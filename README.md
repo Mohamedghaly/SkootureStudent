@@ -1,4 +1,4 @@
-# eschool
+# Skooture
 
 //to run the application
 ```shell
