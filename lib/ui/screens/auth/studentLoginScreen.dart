@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:local_auth/local_auth.dart';
 
 class StudentLoginScreenProvider extends StatelessWidget {
   const StudentLoginScreenProvider({Key? key}) : super(key: key);
@@ -74,10 +75,18 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
 
   bool _hidePassword = true;
 
+  List<BiometricType> _availableBiometrics = [];
+
   @override
   void initState() {
     super.initState();
     _animationController.forward();
+    _getAvailableBiometrics();
+  }
+
+  Future<void> _getAvailableBiometrics() async {
+    _availableBiometrics = await BiometricUtils.getAvailableBiometrics();
+    setState(() {});
   }
 
   @override
@@ -131,7 +140,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     if (canCheckBiometrics) {
       final bool authenticated = await BiometricUtils.authenticate();
       if (authenticated) {
-        context.read<BioAuthCubit>().authenticateWithBiometrics();
+        context.read<BioAuthCubit>().authenticateWithBiometrics(isStudent: true);
       }
     }
   }
@@ -204,6 +213,37 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     );
   }
 
+  Widget _buildBiometricButton() {
+    if (_availableBiometrics.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final biometricType = _availableBiometrics.contains(BiometricType.face)
+        ? BiometricType.face
+        : _availableBiometrics.first;
+
+    final icon = biometricType == BiometricType.face
+        ? Icons.face
+        : Icons.fingerprint;
+
+    return AspectRatio(
+      aspectRatio: 1.0,
+      child: GestureDetector(
+        onTap: _signInWithBiometrics,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).scaffoldBackgroundColor,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoginForm() {
     return Align(
       alignment: Alignment.topCenter,
@@ -262,20 +302,32 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
 
                     /// GR number field
                     const SizedBox(height: 30.0),
-                    CustomTextFieldContainer(
-                      hideText: false,
-                      hintTextKey: grNumberKey,
-                      bottomPadding: 0,
-                      textEditingController: _grNumberTextEditingController,
-                      suffixWidget: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: SvgPicture.asset(
-                          Utils.getImagePath("user_icon.svg"),
-                          colorFilter: ColorFilter.mode(
-                            Utils.getColorScheme(context).secondary,
-                            BlendMode.srcIn,
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: CustomTextFieldContainer(
+                              hideText: false,
+                              hintTextKey: grNumberKey,
+                              bottomPadding: 0,
+                              textEditingController:
+                                  _grNumberTextEditingController,
+                              suffixWidget: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: SvgPicture.asset(
+                                  Utils.getImagePath("user_icon.svg"),
+                                  colorFilter: ColorFilter.mode(
+                                    Utils.getColorScheme(context).secondary,
+                                    BlendMode.srcIn,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 10),
+                          _buildBiometricButton(),
+                        ],
                       ),
                     ),
                     const SizedBox(
@@ -348,41 +400,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                           );
                         },
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    BlocConsumer<BioAuthCubit, BioAuthState>(
-                      listener: (context, state) {
-                        if (state is BioAuthFailure) {
-                          Utils.showCustomSnackBar(
-                            context: context,
-                            errorMessage: Utils.getTranslatedLabel(state.errorMessage),
-                            backgroundColor: Theme.of(context).colorScheme.error,
-                          );
-                        }
-                      },
-                      builder: (context, state) {
-                        return CustomRoundedButton(
-                          onTap: () {
-                            if (state is BioAuthInProgress) {
-                              return;
-                            }
-                            _signInWithBiometrics();
-                          },
-                          widthPercentage: 0.8,
-                          backgroundColor: Utils.getColorScheme(context).primary,
-                          buttonTitle: "Login with Biometrics",
-                          titleColor: Theme.of(context).scaffoldBackgroundColor,
-                          showBorder: false,
-                          child: state is BioAuthInProgress
-                              ? const CustomCircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  widthAndHeight: 20,
-                                )
-                              : null,
-                        );
-                      },
                     ),
                     const SizedBox(
                       height: 10.0,

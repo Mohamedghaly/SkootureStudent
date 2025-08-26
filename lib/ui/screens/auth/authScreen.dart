@@ -71,7 +71,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               MediaQuery.of(context).size.height * (0.05),
         ),
         height: MediaQuery.of(context).size.height * (0.4),
-        child: Lottie.asset("assets/animations/onboarding.json"),
+        child: Lottie.asset("assets/animations/loginScreen1.json"),
       ),
     );
   }

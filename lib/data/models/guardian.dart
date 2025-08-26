@@ -16,7 +16,6 @@ class Guardian {
   final String? createdAt;
   final String? updatedAt;
   final String? fullName;
-  final String? password;
 
   final List<Student>? children;
 
@@ -36,8 +35,7 @@ class Guardian {
       this.createdAt,
       this.updatedAt,
       this.fullName,
-      this.children,
-      this.password});
+      this.children});
 
   Guardian copyWith(
       {int? id,
@@ -55,8 +53,7 @@ class Guardian {
       String? createdAt,
       String? updatedAt,
       String? fullName,
-      List<Student>? children,
-      String? password}) {
+      List<Student>? children}) {
     return Guardian(
       id: id ?? this.id,
       firstName: firstName ?? this.firstName,
@@ -74,7 +71,6 @@ class Guardian {
       updatedAt: updatedAt ?? this.updatedAt,
       fullName: fullName ?? this.fullName,
       children: children ?? this.children,
-      password: password ?? this.password,
     );
   }
 
@@ -94,11 +90,9 @@ class Guardian {
         createdAt = json['created_at'] as String?,
         updatedAt = json['updated_at'] as String?,
         children = ((json['children'] ?? []) as List)
-            .map((student) =>
-                Student.fromJson(Map<String, dynamic>.from(student ?? {})))
+            .map((student) => Student.fromJson(Map.from(student ?? {})))
             .toList(),
-        fullName = json['full_name'] as String?,
-        password = json['password'] as String?;
+        fullName = json['full_name'] as String?;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -117,7 +111,6 @@ class Guardian {
         'updated_at': updatedAt,
         'full_name': fullName,
         'children': children?.map((student) => student.toJson()).toList(),
-        'password': password,
       };
 
   String getFullName() => "$firstName $lastName";

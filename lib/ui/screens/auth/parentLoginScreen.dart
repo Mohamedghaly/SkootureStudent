@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:local_auth/local_auth.dart';
 
 class ParentLoginScreenProvider extends StatelessWidget {
   const ParentLoginScreenProvider({Key? key}) : super(key: key);
@@ -54,7 +55,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     duration: const Duration(milliseconds: 1000),
   );
 
-  late final Animation<double> _patterntAnimation =
+  late final Animation<double> _patterntAnimation = 
       Tween<double>(begin: 0.0, end: 1.0).animate(
     CurvedAnimation(
       parent: _animationController,
@@ -62,7 +63,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     ),
   );
 
-  late final Animation<double> _formAnimation =
+  late final Animation<double> _formAnimation = 
       Tween<double>(begin: 0.0, end: 1.0).animate(
     CurvedAnimation(
       parent: _animationController,
@@ -72,18 +73,26 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
 
   final _schoolCodeController = TextEditingController();
 
-  final TextEditingController _emailTextEditingController =
+  final TextEditingController _emailTextEditingController = 
       TextEditingController(); //default email
 
-  final TextEditingController _passwordTextEditingController =
+  final TextEditingController _passwordTextEditingController = 
       TextEditingController(); //default password
 
   bool _hidePassword = true;
+
+  List<BiometricType> _availableBiometrics = [];
 
   @override
   void initState() {
     super.initState();
     _animationController.forward();
+    _getAvailableBiometrics();
+  }
+
+  Future<void> _getAvailableBiometrics() async {
+    _availableBiometrics = await BiometricUtils.getAvailableBiometrics();
+    setState(() {});
   }
 
   @override
@@ -138,7 +147,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     if (canCheckBiometrics) {
       final bool authenticated = await BiometricUtils.authenticate();
       if (authenticated) {
-        context.read<BioAuthCubit>().authenticateWithBiometrics();
+        context.read<BioAuthCubit>().authenticateWithBiometrics(isStudent: false);
       }
     }
   }
@@ -207,6 +216,37 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     );
   }
 
+  Widget _buildBiometricButton() {
+    if (_availableBiometrics.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final biometricType = _availableBiometrics.contains(BiometricType.face)
+        ? BiometricType.face
+        : _availableBiometrics.first;
+
+    final icon = biometricType == BiometricType.face
+        ? Icons.face
+        : Icons.fingerprint;
+
+    return AspectRatio(
+      aspectRatio: 1.0,
+      child: GestureDetector(
+        onTap: _signInWithBiometrics,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          child: Icon(
+            icon,
+            color: Theme.of(context).scaffoldBackgroundColor,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoginForm() {
     return Align(
       alignment: AlignmentDirectional.topStart,
@@ -214,8 +254,8 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
         opacity: _formAnimation,
         child: Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ), //to make UI scrollable when keyboard is opened
+            bottom: MediaQuery.of(context).viewInsets.bottom, //to make UI scrollable when keyboard is opened
+          ),
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: NotificationListener(
@@ -267,20 +307,31 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                       const SizedBox(
                         height: 30.0,
                       ),
-                      CustomTextFieldContainer(
-                        hideText: false,
-                        hintTextKey: emailKey,
-                        bottomPadding: 0,
-                        textEditingController: _emailTextEditingController,
-                        suffixWidget: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: SvgPicture.asset(
-                            Utils.getImagePath("mail_icon.svg"),
-                            colorFilter: ColorFilter.mode(
-                              Utils.getColorScheme(context).secondary,
-                              BlendMode.srcIn,
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: CustomTextFieldContainer(
+                                hideText: false,
+                                hintTextKey: emailKey,
+                                bottomPadding: 0,
+                                textEditingController: _emailTextEditingController,
+                                suffixWidget: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: SvgPicture.asset(
+                                    Utils.getImagePath("mail_icon.svg"),
+                                    colorFilter: ColorFilter.mode(
+                                      Utils.getColorScheme(context).secondary,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            _buildBiometricButton(),
+                          ],
                         ),
                       ),
                       const SizedBox(
@@ -319,8 +370,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                     student: state.student,
                                   );
 
-                              Get.offNamedUntil(Routes.parentHome,
-                                  (Route<dynamic> route) => false);
+                              Get.offNamedUntil(Routes.parentHome, (Route<dynamic> route) => false);
                             } else if (state is SignInFailure) {
                               Utils.showCustomSnackBar(
                                 context: context,
@@ -358,19 +408,6 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                             );
                           },
                         ),
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      CustomRoundedButton(
-                        onTap: () {
-                          _signInWithBiometrics();
-                        },
-                        widthPercentage: 0.8,
-                        backgroundColor: Utils.getColorScheme(context).primary,
-                        buttonTitle: "Login with Biometrics",
-                        titleColor: Theme.of(context).scaffoldBackgroundColor,
-                        showBorder: false,
                       ),
                       const SizedBox(
                         height: 10.0,

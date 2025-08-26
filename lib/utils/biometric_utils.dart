@@ -13,6 +13,15 @@ class BiometricUtils {
     }
   }
 
+  static Future<List<BiometricType>> getAvailableBiometrics() async {
+    try {
+      return await _auth.getAvailableBiometrics();
+    } on PlatformException catch (e) {
+      print(e);
+      return <BiometricType>[];
+    }
+  }
+
   static Future<bool> authenticate() async {
     try {
       return await _auth.authenticate(
