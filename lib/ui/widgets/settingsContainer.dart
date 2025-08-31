@@ -28,7 +28,6 @@ class SettingsContainer extends StatelessWidget {
     } else {
       if (context.mounted) {
         Utils.showCustomSnackBar(
-        
           context: context,
           errorMessage: Utils.getTranslatedLabel(
             ErrorMessageKeysAndCode.shareAppLinkKey,
@@ -226,28 +225,29 @@ class SettingsContainer extends StatelessWidget {
           },
           context: context,
         ),
-        _buildSettingDetailsTile(
-          icon: Icons.star,
-          title: Utils.getTranslatedLabel(rateUsKey),
-          onTap: () {
-            _shareApp(context);
-          },
-          context: context,
-        ),
-        _buildSettingDetailsTile(
-          icon: Icons.share,
-          title: Utils.getTranslatedLabel(shareKey),
-          onTap: () {
-            _shareApp(context);
-          },
-          context: context,
-        ),
+        // _buildSettingDetailsTile(
+        //   icon: Icons.star,
+        //   title: Utils.getTranslatedLabel(rateUsKey),
+        //   onTap: () {
+        //     _shareApp(context);
+        //   },
+        //   context: context,
+        // ),
+        // _buildSettingDetailsTile(
+        //   icon: Icons.share,
+        //   title: Utils.getTranslatedLabel(shareKey),
+        //   onTap: () {
+        //     _shareApp(context);
+        //   },
+        //   context: context,
+        // ),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final appVersion = context.read<AppConfigurationCubit>().getAppVersion();
     return Stack(
       children: [
         Align(
@@ -271,15 +271,16 @@ class SettingsContainer extends StatelessWidget {
                 const SizedBox(
                   height: 5.0,
                 ),
-                Text(
-                  "${Utils.getTranslatedLabel(appVersionKey)}  ${context.read<AppConfigurationCubit>().getAppVersion()}",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 11.0,
+                if (appVersion.isNotEmpty)
+                  Text(
+                    "${Utils.getTranslatedLabel(appVersionKey)}  $appVersion",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 11.0,
+                    ),
+                    textAlign: TextAlign.start,
                   ),
-                  textAlign: TextAlign.start,
-                ),
                 //extra height to avoide dashboard's bottom navigationbar
                 SizedBox(
                   height: MediaQuery.of(context).size.height *

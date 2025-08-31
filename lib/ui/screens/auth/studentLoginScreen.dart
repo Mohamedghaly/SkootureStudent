@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:local_auth/local_auth.dart';
 
 class StudentLoginScreenProvider extends StatelessWidget {
   const StudentLoginScreenProvider({Key? key}) : super(key: key);
@@ -48,7 +49,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     duration: const Duration(milliseconds: 1000),
   );
 
-  late final Animation<double> _patterntAnimation = 
+  late final Animation<double> _patterntAnimation =
       Tween<double>(begin: 0.0, end: 1.0).animate(
     CurvedAnimation(
       parent: _animationController,
@@ -56,7 +57,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     ),
   );
 
-  late final Animation<double> _formAnimation = 
+  late final Animation<double> _formAnimation =
       Tween<double>(begin: 0.0, end: 1.0).animate(
     CurvedAnimation(
       parent: _animationController,
@@ -64,20 +65,28 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     ),
   );
 
-  final TextEditingController _grNumberTextEditingController = 
+  final TextEditingController _grNumberTextEditingController =
       TextEditingController(); //default grNumber
 
-  final TextEditingController _passwordTextEditingController = 
+  final TextEditingController _passwordTextEditingController =
       TextEditingController(); //default password
 
   final _schoolCodeController = TextEditingController();
 
   bool _hidePassword = true;
 
+  List<BiometricType> _availableBiometrics = [];
+
   @override
   void initState() {
     super.initState();
     _animationController.forward();
+    _getAvailableBiometrics();
+  }
+
+  Future<void> _getAvailableBiometrics() async {
+    _availableBiometrics = await BiometricUtils.getAvailableBiometrics();
+    setState(() {});
   }
 
   @override
@@ -131,7 +140,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     if (canCheckBiometrics) {
       final bool authenticated = await BiometricUtils.authenticate();
       if (authenticated) {
-        context.read<BioAuthCubit>().authenticateWithBiometrics();
+        context
+            .read<BioAuthCubit>()
+            .authenticateWithBiometrics(isStudent: true);
       }
     }
   }
@@ -204,6 +215,45 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     );
   }
 
+  Widget _buildBiometricButton() {
+    if (_availableBiometrics.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final biometricType = _availableBiometrics.contains(BiometricType.face)
+        ? BiometricType.face
+        : _availableBiometrics.first;
+
+    final isFace = biometricType == BiometricType.face;
+
+    return SizedBox(
+      width: 50.0,
+      height: 50.0,
+      child: GestureDetector(
+        onTap: _signInWithBiometrics,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          child: isFace
+              ? SvgPicture.asset(
+                  "assets/images/faceID.svg",
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).scaffoldBackgroundColor,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : Icon(
+                  Icons.fingerprint,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoginForm() {
     return Align(
       alignment: Alignment.topCenter,
@@ -225,12 +275,19 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                 padding: EdgeInsets.only(
                   left: MediaQuery.of(context).size.width * (0.075),
                   right: MediaQuery.of(context).size.width * (0.075),
-                  top: MediaQuery.of(context).size.height * (0.17),
+                  top: MediaQuery.of(context).size.height * (0.15),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Image(
+                      image: AssetImage("assets/images/skootureLogo.png"),
+                      height: MediaQuery.of(context).size.width * 0.4,
+                    ),
+                    const SizedBox(
+                      height: 5.0,
+                    ),
                     Text(
                       Utils.getTranslatedLabel(letsSignInKey),
                       style: TextStyle(
@@ -262,21 +319,30 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
 
                     /// GR number field
                     const SizedBox(height: 30.0),
-                    CustomTextFieldContainer(
-                      hideText: false,
-                      hintTextKey: grNumberKey,
-                      bottomPadding: 0,
-                      textEditingController: _grNumberTextEditingController,
-                      suffixWidget: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: SvgPicture.asset(
-                          Utils.getImagePath("user_icon.svg"),
-                          colorFilter: ColorFilter.mode(
-                            Utils.getColorScheme(context).secondary,
-                            BlendMode.srcIn,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomTextFieldContainer(
+                            hideText: false,
+                            hintTextKey: grNumberKey,
+                            bottomPadding: 0,
+                            textEditingController:
+                                _grNumberTextEditingController,
+                            suffixWidget: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: SvgPicture.asset(
+                                Utils.getImagePath("user_icon.svg"),
+                                colorFilter: ColorFilter.mode(
+                                  Utils.getColorScheme(context).secondary,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                        // const SizedBox(width: 10),
+                        // _buildBiometricButton(),
+                      ],
                     ),
                     const SizedBox(
                       height: 30.0,
@@ -310,8 +376,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                                   student: state.student,
                                 );
 
-                            Get.offNamedUntil(Routes.home,
-                                (Route<dynamic> route) => false);
+                            Get.offNamedUntil(
+                                Routes.home, (Route<dynamic> route) => false);
                           } else if (state is SignInFailure) {
                             Utils.showCustomSnackBar(
                               context: context,
@@ -348,41 +414,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                           );
                         },
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    BlocConsumer<BioAuthCubit, BioAuthState>(
-                      listener: (context, state) {
-                        if (state is BioAuthFailure) {
-                          Utils.showCustomSnackBar(
-                            context: context,
-                            errorMessage: Utils.getTranslatedLabel(state.errorMessage),
-                            backgroundColor: Theme.of(context).colorScheme.error,
-                          );
-                        }
-                      },
-                      builder: (context, state) {
-                        return CustomRoundedButton(
-                          onTap: () {
-                            if (state is BioAuthInProgress) {
-                              return;
-                            }
-                            _signInWithBiometrics();
-                          },
-                          widthPercentage: 0.8,
-                          backgroundColor: Utils.getColorScheme(context).primary,
-                          buttonTitle: "Login with Biometrics",
-                          titleColor: Theme.of(context).scaffoldBackgroundColor,
-                          showBorder: false,
-                          child: state is BioAuthInProgress
-                              ? const CustomCircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  widthAndHeight: 20,
-                                )
-                              : null,
-                        );
-                      },
                     ),
                     const SizedBox(
                       height: 10.0,

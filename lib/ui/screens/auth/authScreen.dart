@@ -71,7 +71,7 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
               MediaQuery.of(context).size.height * (0.05),
         ),
         height: MediaQuery.of(context).size.height * (0.4),
-        child: Lottie.asset("assets/animations/onboarding.json"),
+        child: Lottie.asset("assets/animations/loginScreen1.json"),
       ),
     );
   }
@@ -108,8 +108,13 @@ class _AuthScreenState extends State<AuthScreen> with TickerProviderStateMixin {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            //
-
+                            Image.asset(
+                              "assets/images/skootureLogo.png",
+                              height: boxConstraints.maxHeight * (0.1),
+                            ),
+                            SizedBox(
+                              height: boxConstraints.maxHeight * (0.05),
+                            ),
                             Padding(
                               padding: EdgeInsets.symmetric(
                                 horizontal:

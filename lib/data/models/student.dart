@@ -4,7 +4,6 @@ import 'package:eschool/data/models/guardian.dart';
 import 'package:eschool/data/models/school.dart';
 import 'package:eschool/data/models/studentProfileExtraDetails.dart';
 
-
 class Student {
   final int? id;
   final int? userId;
@@ -30,169 +29,151 @@ class Student {
   final String? admissionDate;
   final List<StudentProfileExtraDetails>? studentProfileExtraDetails;
   final ChildUserDetails? childUserDetails;
-  final String? password;
 
-  Student({
-    this.id,
-    this.firstName,
-    this.userId,
-    this.lastName,
-    this.mobile,
-    this.gender,
-    this.image,
-    this.dob,
-    this.currentAddress,
-    this.permanentAddress,
-    this.status,
-    this.fcmId,
-    this.schoolId,
-    this.createdAt,
-    this.updatedAt,
-    this.classSection,
-    this.guardian,
-    this.school,
-    this.admissionDate,
-    this.admissionNo,
-    this.rollNumber,
-    this.sessionYearId,
-    this.studentProfileExtraDetails,
-    this.childUserDetails,
-    this.password,
-  });
+  Student(
+      {this.id,
+      this.firstName,
+      this.userId,
+      this.lastName,
+      this.mobile,
+      this.gender,
+      this.image,
+      this.dob,
+      this.currentAddress,
+      this.permanentAddress,
+      this.status,
+      this.fcmId,
+      this.schoolId,
+      this.createdAt,
+      this.updatedAt,
+      this.classSection,
+      this.guardian,
+      this.school,
+      this.admissionDate,
+      this.admissionNo,
+      this.rollNumber,
+      this.sessionYearId,
+      this.studentProfileExtraDetails,
+      this.childUserDetails});
 
-  Student copyWith({
-    int? id,
-    String? firstName,
-    int? userId,
-    String? lastName,
-    String? mobile,
-    String? gender,
-    String? image,
-    String? dob,
-    String? currentAddress,
-    String? permanentAddress,
-    int? status,
-    String? fcmId,
-    int? schoolId,
-    String? createdAt,
-    String? updatedAt,
-    ClassSection? classSection,
-    Guardian? guardian,
-    School? school,
-    int? sessionYearId,
-    int? rollNumber,
-    String? admissionNo,
-    String? admissionDate,
-    List<StudentProfileExtraDetails>? studentProfileExtraDetails,
-    ChildUserDetails? childUserDetails,
-    String? password,
-  }) {
+  Student copyWith(
+      {int? id,
+      String? firstName,
+      String? lastName,
+      String? mobile,
+      String? gender,
+      String? image,
+      String? dob,
+      String? currentAddress,
+      String? permanentAddress,
+      int? status,
+      String? fcmId,
+      int? schoolId,
+      String? createdAt,
+      String? updatedAt,
+      ClassSection? classSection,
+      Guardian? guardian,
+      School? school,
+      String? admissionNo,
+      String? admissionDate,
+      int? rollNumber,
+      int? sessionYearId,
+      int? userId,
+      List<StudentProfileExtraDetails>? studentProfileExtraDetails,
+      ChildUserDetails? childUserDetails}) {
     return Student(
-      id: id ?? this.id,
-      firstName: firstName ?? this.firstName,
-      userId: userId ?? this.userId,
-      lastName: lastName ?? this.lastName,
-      mobile: mobile ?? this.mobile,
-      gender: gender ?? this.gender,
-      image: image ?? this.image,
-      dob: dob ?? this.dob,
-      currentAddress: currentAddress ?? this.currentAddress,
-      permanentAddress: permanentAddress ?? this.permanentAddress,
-      status: status ?? this.status,
-      fcmId: fcmId ?? this.fcmId,
-      schoolId: schoolId ?? this.schoolId,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      classSection: classSection ?? this.classSection,
-      guardian: guardian ?? this.guardian,
-      school: school ?? this.school,
-      sessionYearId: sessionYearId ?? this.sessionYearId,
-      rollNumber: rollNumber ?? this.rollNumber,
-      admissionNo: admissionNo ?? this.admissionNo,
-      admissionDate: admissionDate ?? this.admissionDate,
-      studentProfileExtraDetails:
-          studentProfileExtraDetails ?? this.studentProfileExtraDetails,
-      childUserDetails: childUserDetails ?? this.childUserDetails,
-      password: password ?? this.password,
-    );
+        userId: userId ?? this.userId,
+        id: id ?? this.id,
+        childUserDetails: childUserDetails ?? this.childUserDetails,
+        firstName: firstName ?? this.firstName,
+        lastName: lastName ?? this.lastName,
+        mobile: mobile ?? this.mobile,
+        gender: gender ?? this.gender,
+        image: image ?? this.image,
+        dob: dob ?? this.dob,
+        currentAddress: currentAddress ?? this.currentAddress,
+        permanentAddress: permanentAddress ?? this.permanentAddress,
+        status: status ?? this.status,
+        fcmId: fcmId ?? this.fcmId,
+        schoolId: schoolId ?? this.schoolId,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        classSection: classSection ?? this.classSection,
+        guardian: guardian ?? this.guardian,
+        school: school ?? this.school,
+        admissionDate: admissionDate ?? this.admissionDate,
+        admissionNo: admissionNo ?? this.admissionNo,
+        rollNumber: rollNumber ?? this.rollNumber,
+        sessionYearId: sessionYearId ?? this.sessionYearId,
+        studentProfileExtraDetails:
+            studentProfileExtraDetails ?? this.studentProfileExtraDetails);
   }
 
   Student.fromJson(Map<String, dynamic> json)
       : id = json['id'] as int?,
-        userId = json['userId'] as int?,
-        firstName = json['firstName'] as String?,
-        lastName = json['lastName'] as String?,
+        childUserDetails =
+            ChildUserDetails.fromJson(Map.from(json['user'] ?? {})),
+        userId = json['user_id'] as int?,
+        firstName = json['first_name'] as String?,
+        lastName = json['last_name'] as String?,
         mobile = json['mobile'] as String?,
         gender = json['gender'] as String?,
         image = json['image'] as String?,
         dob = json['dob'] as String?,
-        currentAddress = json['currentAddress'] as String?,
-        permanentAddress = json['permanentAddress'] as String?,
-        status = json['status'] as int?,
-        fcmId = json['fcmId'] as String?,
-        schoolId = json['schoolId'] as int?,
-        createdAt = json['createdAt'] as String?,
-        updatedAt = json['updatedAt'] as String?,
-        classSection = json['classSection'] != null
-            ? ClassSection.fromJson(
-                Map<String, dynamic>.from(json['classSection']))
-            : null,
-        guardian = json['guardian'] != null
-            ? Guardian.fromJson(Map<String, dynamic>.from(json['guardian']))
-            : null,
-        school = json['school'] != null
-            ? School.fromJson(Map<String, dynamic>.from(json['school']))
-            : null,
-        sessionYearId = json['sessionYearId'] as int?,
-        rollNumber = json['rollNumber'] as int?,
-        admissionNo = json['admissionNo'] as String?,
-        admissionDate = json['admissionDate'] as String?,
-        studentProfileExtraDetails =
-            (json['studentProfileExtraDetails'] as List<dynamic>?)
-                ?.map((e) => StudentProfileExtraDetails.fromJson(
-                    Map<String, dynamic>.from(e)))
-                .toList(),
-        childUserDetails = json['childUserDetails'] != null
-            ? ChildUserDetails.fromJson(
-                Map<String, dynamic>.from(json['childUserDetails']))
-            : null,
-        password = json['password'] as String?;
+        currentAddress = json['current_address'] as String?,
+        permanentAddress = json['permanent_address'] as String?,
+        status = int.parse((json['status'] ?? 0).toString()),
+        fcmId = json['fcm_id'] as String?,
+        schoolId = json['school_id'] as int?,
+        createdAt = json['created_at'] as String?,
+        classSection =
+            ClassSection.fromJson(Map.from(json['class_section'] ?? {})),
+        guardian = Guardian.fromJson(Map.from(json['guardian'] ?? {})),
+        school = School.fromJson(Map.from(json['school'] ?? {})),
+        sessionYearId = json['session_year_id'] as int?,
+        rollNumber = json['roll_number'] as int?,
+        admissionDate = json['admission_date'] as String?,
+        admissionNo = json['admission_no'] as String?,
+        studentProfileExtraDetails = ((json['extra_details'] ?? []) as List)
+            .map((details) =>
+                StudentProfileExtraDetails.fromJson(Map.from(details ?? {})))
+            .toList(),
+        updatedAt = json['updated_at'] as String?;
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'userId': userId,
-        'firstName': firstName,
-        'lastName': lastName,
+        'first_name': firstName,
+        'last_name': lastName,
         'mobile': mobile,
         'gender': gender,
         'image': image,
         'dob': dob,
-        'currentAddress': currentAddress,
-        'permanentAddress': permanentAddress,
+        'current_address': currentAddress,
+        'permanent_address': permanentAddress,
         'status': status,
-        'fcmId': fcmId,
-        'schoolId': schoolId,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-        'classSection': classSection?.toJson(),
+        'fcm_id': fcmId,
+        'school_id': schoolId,
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+        'class_section': classSection?.toJson(),
         'guardian': guardian?.toJson(),
         'school': school?.toJson(),
-        'sessionYearId': sessionYearId,
-        'rollNumber': rollNumber,
-        'admissionNo': admissionNo,
-        'admissionDate': admissionDate,
-        'studentProfileExtraDetails':
+        'session_year_id': sessionYearId,
+        'roll_number': rollNumber,
+        'admission_date': admissionDate,
+        'admission_no': admissionNo,
+        'user_id': userId,
+        'extra_details':
             studentProfileExtraDetails?.map((e) => e.toJson()).toList(),
-        'childUserDetails': childUserDetails?.toJson(),
-        'password': password,
+        'user': childUserDetails?.toJson(),
       };
 
-        String getFullName() {
-        return "$firstName $lastName";
-        }
+  String getFullName() {
+    return "$firstName $lastName";
+  }
 
-        @override
-        String toString() {
-         return '$firstName $lastName - ${classSection?.classDetails?.name}${classSection?.section?.name}';
-        }
+  @override
+  String toString() {
+    return '$firstName $lastName - ${classSection?.classDetails?.name}${classSection?.section?.name}';
+  }
 }

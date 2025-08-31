@@ -31,18 +31,17 @@ class BioAuthCubit extends Cubit<BioAuthState> {
 
   BioAuthCubit(this._signInCubit) : super(BioAuthInitial());
 
-  Future<void> authenticateWithBiometrics() async {
+  Future<void> authenticateWithBiometrics({required bool isStudent}) async {
     emit(BioAuthInProgress());
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('userId');
       final password = prefs.getString('password');
-      final isStudentLogin = prefs.getBool('isStudentLogin');
+      final isStudentLogin = isStudent;
       final schoolCode = prefs.getString('schoolCode');
-
+        print('isStudentLogin: $isStudentLogin');
       if (userId != null &&
           password != null &&
-          isStudentLogin != null &&
           schoolCode != null) {
         await _signInCubit.signInUser(
           userId: userId,

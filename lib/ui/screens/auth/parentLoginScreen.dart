@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:local_auth/local_auth.dart';
 
 class ParentLoginScreenProvider extends StatelessWidget {
   const ParentLoginScreenProvider({Key? key}) : super(key: key);
@@ -80,10 +81,18 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
 
   bool _hidePassword = true;
 
+  List<BiometricType> _availableBiometrics = [];
+
   @override
   void initState() {
     super.initState();
     _animationController.forward();
+    _getAvailableBiometrics();
+  }
+
+  Future<void> _getAvailableBiometrics() async {
+    _availableBiometrics = await BiometricUtils.getAvailableBiometrics();
+    setState(() {});
   }
 
   @override
@@ -138,7 +147,9 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     if (canCheckBiometrics) {
       final bool authenticated = await BiometricUtils.authenticate();
       if (authenticated) {
-        context.read<BioAuthCubit>().authenticateWithBiometrics();
+        context
+            .read<BioAuthCubit>()
+            .authenticateWithBiometrics(isStudent: false);
       }
     }
   }
@@ -207,6 +218,45 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     );
   }
 
+  Widget _buildBiometricButton() {
+    if (_availableBiometrics.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final biometricType = _availableBiometrics.contains(BiometricType.face)
+        ? BiometricType.face
+        : _availableBiometrics.first;
+
+    final isFace = biometricType == BiometricType.face;
+
+    return SizedBox(
+      width: 50.0,
+      height: 50.0,
+      child: GestureDetector(
+        onTap: _signInWithBiometrics,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          child: isFace
+              ? SvgPicture.asset(
+                  "assets/images/faceID.svg",
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).scaffoldBackgroundColor,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : Icon(
+                  Icons.fingerprint,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLoginForm() {
     return Align(
       alignment: AlignmentDirectional.topStart,
@@ -214,8 +264,10 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
         opacity: _formAnimation,
         child: Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ), //to make UI scrollable when keyboard is opened
+            bottom: MediaQuery.of(context)
+                .viewInsets
+                .bottom, //to make UI scrollable when keyboard is opened
+          ),
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: NotificationListener(
@@ -228,13 +280,20 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                 padding: EdgeInsets.only(
                   left: MediaQuery.of(context).size.width * (0.075),
                   right: MediaQuery.of(context).size.width * (0.075),
-                  top: MediaQuery.of(context).size.height * (0.17),
+                  top: MediaQuery.of(context).size.height * (0.15),
                 ),
                 child: Form(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Image(
+                        image: AssetImage("assets/images/skootureLogo.png"),
+                        width: MediaQuery.of(context).size.width * 0.4,
+                      ),
+                      const SizedBox(
+                        height: 5.0,
+                      ),
                       Text(
                         Utils.getTranslatedLabel(letsSignInKey),
                         style: TextStyle(
@@ -267,20 +326,32 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                       const SizedBox(
                         height: 30.0,
                       ),
-                      CustomTextFieldContainer(
-                        hideText: false,
-                        hintTextKey: emailKey,
-                        bottomPadding: 0,
-                        textEditingController: _emailTextEditingController,
-                        suffixWidget: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: SvgPicture.asset(
-                            Utils.getImagePath("mail_icon.svg"),
-                            colorFilter: ColorFilter.mode(
-                              Utils.getColorScheme(context).secondary,
-                              BlendMode.srcIn,
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: CustomTextFieldContainer(
+                                hideText: false,
+                                hintTextKey: emailKey,
+                                bottomPadding: 0,
+                                textEditingController:
+                                    _emailTextEditingController,
+                                suffixWidget: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: SvgPicture.asset(
+                                    Utils.getImagePath("mail_icon.svg"),
+                                    colorFilter: ColorFilter.mode(
+                                      Utils.getColorScheme(context).secondary,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 10),
+                            _buildBiometricButton(),
+                          ],
                         ),
                       ),
                       const SizedBox(
@@ -358,19 +429,6 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                             );
                           },
                         ),
-                      ),
-                      const SizedBox(
-                        height: 10.0,
-                      ),
-                      CustomRoundedButton(
-                        onTap: () {
-                          _signInWithBiometrics();
-                        },
-                        widthPercentage: 0.8,
-                        backgroundColor: Utils.getColorScheme(context).primary,
-                        buttonTitle: "Login with Biometrics",
-                        titleColor: Theme.of(context).scaffoldBackgroundColor,
-                        showBorder: false,
                       ),
                       const SizedBox(
                         height: 10.0,
