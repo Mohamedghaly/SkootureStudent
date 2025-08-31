@@ -55,7 +55,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     duration: const Duration(milliseconds: 1000),
   );
 
-  late final Animation<double> _patterntAnimation = 
+  late final Animation<double> _patterntAnimation =
       Tween<double>(begin: 0.0, end: 1.0).animate(
     CurvedAnimation(
       parent: _animationController,
@@ -63,7 +63,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     ),
   );
 
-  late final Animation<double> _formAnimation = 
+  late final Animation<double> _formAnimation =
       Tween<double>(begin: 0.0, end: 1.0).animate(
     CurvedAnimation(
       parent: _animationController,
@@ -73,10 +73,10 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
 
   final _schoolCodeController = TextEditingController();
 
-  final TextEditingController _emailTextEditingController = 
+  final TextEditingController _emailTextEditingController =
       TextEditingController(); //default email
 
-  final TextEditingController _passwordTextEditingController = 
+  final TextEditingController _passwordTextEditingController =
       TextEditingController(); //default password
 
   bool _hidePassword = true;
@@ -147,7 +147,9 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
     if (canCheckBiometrics) {
       final bool authenticated = await BiometricUtils.authenticate();
       if (authenticated) {
-        context.read<BioAuthCubit>().authenticateWithBiometrics(isStudent: false);
+        context
+            .read<BioAuthCubit>()
+            .authenticateWithBiometrics(isStudent: false);
       }
     }
   }
@@ -225,23 +227,31 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
         ? BiometricType.face
         : _availableBiometrics.first;
 
-    final icon = biometricType == BiometricType.face
-        ? Icons.face
-        : Icons.fingerprint;
+    final isFace = biometricType == BiometricType.face;
 
-    return AspectRatio(
-      aspectRatio: 1.0,
+    return SizedBox(
+      width: 50.0,
+      height: 50.0,
       child: GestureDetector(
         onTap: _signInWithBiometrics,
         child: Container(
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: Theme.of(context).colorScheme.primary,
           ),
-          child: Icon(
-            icon,
-            color: Theme.of(context).scaffoldBackgroundColor,
-          ),
+          child: isFace
+              ? SvgPicture.asset(
+                  "assets/images/faceID.svg",
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).scaffoldBackgroundColor,
+                    BlendMode.srcIn,
+                  ),
+                )
+              : Icon(
+                  Icons.fingerprint,
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
         ),
       ),
     );
@@ -254,7 +264,9 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
         opacity: _formAnimation,
         child: Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom, //to make UI scrollable when keyboard is opened
+            bottom: MediaQuery.of(context)
+                .viewInsets
+                .bottom, //to make UI scrollable when keyboard is opened
           ),
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
@@ -268,13 +280,20 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                 padding: EdgeInsets.only(
                   left: MediaQuery.of(context).size.width * (0.075),
                   right: MediaQuery.of(context).size.width * (0.075),
-                  top: MediaQuery.of(context).size.height * (0.17),
+                  top: MediaQuery.of(context).size.height * (0.15),
                 ),
                 child: Form(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Image(
+                        image: AssetImage("assets/images/skootureLogo.png"),
+                        width: MediaQuery.of(context).size.width * 0.4,
+                      ),
+                      const SizedBox(
+                        height: 5.0,
+                      ),
                       Text(
                         Utils.getTranslatedLabel(letsSignInKey),
                         style: TextStyle(
@@ -316,7 +335,8 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                 hideText: false,
                                 hintTextKey: emailKey,
                                 bottomPadding: 0,
-                                textEditingController: _emailTextEditingController,
+                                textEditingController:
+                                    _emailTextEditingController,
                                 suffixWidget: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: SvgPicture.asset(
@@ -370,7 +390,8 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                     student: state.student,
                                   );
 
-                              Get.offNamedUntil(Routes.parentHome, (Route<dynamic> route) => false);
+                              Get.offNamedUntil(Routes.parentHome,
+                                  (Route<dynamic> route) => false);
                             } else if (state is SignInFailure) {
                               Utils.showCustomSnackBar(
                                 context: context,
