@@ -380,6 +380,7 @@
   "failedToLoadQuestions": "Failed to load questions",
   "noQuestionsAvailableForExam": "No questions available for this exam.",
   "initializingExam": "Initializing exam...",
-  "examAlreadyAttempted": "You have already attempted this exam. You cannot take it again."
+  "examAlreadyAttempted": "You have already attempted this exam. You cannot take it again.",
+  "biometricLoginFailedPleaseLoginManually": "Biometric login failed. Please login manually."
 
 }

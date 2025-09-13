@@ -380,5 +380,6 @@
   "failedToLoadQuestions": "Échec du chargement des questions",
   "noQuestionsAvailableForExam": "Aucune question disponible pour cet examen.",
   "initializingExam": "Initialisation de l'examen...",
-  "examAlreadyAttempted": "Vous avez déjà passé cet examen. Vous ne pouvez pas le repasser."
+  "examAlreadyAttempted": "Vous avez déjà passé cet examen. Vous ne pouvez pas le repasser.",
+  "biometricLoginFailedPleaseLoginManually": "Échec de la connexion biométrique. Veuillez vous connecter manuellement."
 }

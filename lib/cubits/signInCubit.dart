@@ -77,12 +77,14 @@ class SignInCubit extends Cubit<SignInState> {
       }
 
       //Save credentials
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('userId', userId);
-      await prefs.setString('password', password);
-      await prefs.setBool('isStudentLogin', isStudentLogin);
-      await prefs.setString('schoolCode', schoolCode);
-
+      if (!isStudentLogin){
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', userId);
+        await prefs.setString('password', password);
+        await prefs.setBool('isStudentLogin', isStudentLogin);
+        await prefs.setString('schoolCode', schoolCode);
+      }
+      
       emit(
         SignInSuccess(
           schoolCode: schoolCode,

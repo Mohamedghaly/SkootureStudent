@@ -439,3 +439,4 @@ const String failedToLoadQuestionsKey = "failedToLoadQuestions";
 const String noQuestionsAvailableForExamKey = "noQuestionsAvailableForExam";
 const String initializingExamKey = "initializingExam";
 const String examAlreadyAttemptedKey = "examAlreadyAttempted";
+const String biometricLoginFailedPleaseLoginManuallyKey = "biometricLoginFailedPleaseLoginManually";

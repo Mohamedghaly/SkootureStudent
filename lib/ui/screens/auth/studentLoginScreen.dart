@@ -283,7 +283,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                   children: [
                     Image(
                       image: AssetImage("assets/images/skootureLogo.png"),
-                      height: MediaQuery.of(context).size.width * 0.4,
+                      width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(
                       height: 5.0,

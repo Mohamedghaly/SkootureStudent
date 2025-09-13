@@ -380,5 +380,6 @@
   "failedToLoadQuestions": "فشل في تحميل الأسئلة",
   "noQuestionsAvailableForExam": "لا توجد أسئلة متاحة لهذا الامتحان.",
   "initializingExam": "جاري تهيئة الامتحان...",
-  "examAlreadyAttempted": "لقد حاولت بالفعل إجراء هذا الامتحان. لا يمكنك إجراؤه مرة أخرى."
+  "examAlreadyAttempted": "لقد حاولت بالفعل إجراء هذا الامتحان. لا يمكنك إجراؤه مرة أخرى.",
+  "biometricLoginFailedPleaseLoginManually": "فشل تسجيل الدخول البيومتري. يرجى تسجيل الدخول يدويًا."
 }

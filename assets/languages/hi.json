@@ -380,5 +380,6 @@
   "failedToLoadQuestions": "प्रश्न लोड करने में विफल",
   "noQuestionsAvailableForExam": "इस परीक्षा के लिए कोई प्रश्न उपलब्ध नहीं है।",
   "initializingExam": "परीक्षा प्रारंभ की जा रही है...",
-  "examAlreadyAttempted": "आप पहले से ही इस परीक्षा में शामिल हो चुके हैं। आप इसे दोबारा नहीं ले सकते।"
+  "examAlreadyAttempted": "आप पहले से ही इस परीक्षा में शामिल हो चुके हैं। आप इसे दोबारा नहीं ले सकते।",
+  "biometricLoginFailedPleaseLoginManually": "बायोमेट्रिक लॉगिन विफल। कृपया मैन्युअल रूप से लॉगिन करें।"
 }

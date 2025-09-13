@@ -494,14 +494,27 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          _buildUpperPattern(),
-          _buildLowerPattern(),
-          _buildLoginForm(),
-        ],
+    return BlocListener<BioAuthCubit, BioAuthState>(
+      listener: (context, state) {
+        if (state is BioAuthFailure) {
+          Utils.showCustomSnackBar(
+            context: context,
+            errorMessage: Utils.getTranslatedLabel(
+              "biometricLoginFailedPleaseLoginManually",
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          );
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            _buildUpperPattern(),
+            _buildLowerPattern(),
+            _buildLoginForm(),
+          ],
+        ),
       ),
     );
   }

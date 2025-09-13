@@ -380,5 +380,6 @@
   "failedToLoadQuestions": "سوالات لوڈ کرنے میں ناکامی",
   "noQuestionsAvailableForExam": "اس امتحان کے لیے کوئی سوالات دستیاب نہیں ہیں۔",
   "initializingExam": "امتحان شروع کیا جا رہا ہے...",
-  "examAlreadyAttempted": "آپ نے پہلے ہی اس امتحان میں حصہ لیا ہے۔ آپ اسے دوبارہ نہیں لے سکتے۔"
+  "examAlreadyAttempted": "آپ نے پہلے ہی اس امتحان میں حصہ لیا ہے۔ آپ اسے دوبارہ نہیں لے سکتے۔",
+  "biometricLoginFailedPleaseLoginManually": "بایومیٹرک لاگ ان ناکام ہو گیا۔ براہ کرم دستی طور پر لاگ ان کریں۔"
 }
