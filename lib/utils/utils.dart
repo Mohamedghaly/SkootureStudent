@@ -832,6 +832,21 @@ class Utils {
       return null;
     }
   }
+
+  static DateTime parseTransactionDate(String dateString) {
+    try {
+      return intl.DateFormat('dd-MM-yyyy hh:mm a').parse(dateString);
+    } catch (e) {
+      print('Error parsing transaction date: $dateString, Error: $e');
+      // Fallback to ISO 8601 format if the custom format fails
+      try {
+        return DateTime.parse(dateString);
+      } catch (e) {
+        print('Error parsing transaction date with ISO format: $dateString, Error: $e');
+        return DateTime.now();
+      }
+    }
+  }
 }
 
 extension DateTimeExtension on DateTime {
