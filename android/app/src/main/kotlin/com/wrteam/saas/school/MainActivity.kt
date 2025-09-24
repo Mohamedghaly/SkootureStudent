@@ -1,4 +1,4 @@
-package com.wrteam.saas.school
+package com.skooture.app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

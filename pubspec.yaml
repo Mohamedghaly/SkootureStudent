@@ -74,7 +74,7 @@ dependencies:
   # flutter_local_notifications: ^18.0.1
   flutter_inappwebview: ^6.1.0+1
   curl_logger_dio_interceptor: ^1.0.0
-  webview_flutter: ^4.0.0
+  webview_flutter: ^4.2.2
   local_auth: ^2.3.0
 
   
