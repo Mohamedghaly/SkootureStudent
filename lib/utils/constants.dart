@@ -116,3 +116,17 @@ List<String> months = [
   novemberKey,
   decemberKey,
 ];
+
+// UI constants
+const double appContentHorizontalPadding = 20.0;
+double bottomsheetBorderRadius = 15.0;
+double topPaddingOfErrorAndLoadingContainer = 150;
+
+/// Transport Report Issue Label Keys
+const List<String> transportReportIssueLabelKeys = [
+  unsafeDrivingKey,
+  unauthorizedPersonKey,
+  missedPickupKey,
+  uncleanBusInteriorKey,
+  busBreakdownKey,
+];

@@ -167,6 +167,29 @@ class Api {
   static String getTransactions = "${databaseUrl}payment-transactions";
   static String downloadFeeReceipt = "${databaseUrl}parent/fees/receipt";
   static String downloadStudentResult = "${databaseUrl}student-exan-result-pdf";
+  static String getDiaries = "${databaseUrl}diaries";
+  static String getStudentDetails = "${databaseUrl}student-details";
+  static String getStudentDiaryCategories =
+      "${databaseUrl}student/diary-categories";
+  static String getParentDiaryCategories =
+      "${databaseUrl}parent/diary-categories";
+
+  /// Transportation
+  static String getPickupPoints = "${databaseUrl}pickup-points";
+  static String getTransportationShifts = "${databaseUrl}transportation-shifts";
+  static String getTransportationFees = "${databaseUrl}transportation-fees";
+  static String payTransportationFees = "${databaseUrl}transportation-payments";
+  static String getTransportDashboard = "${databaseUrl}transport/dashboard";
+  static String getVehicleAssignmentStatus =
+      "${databaseUrl}get-vehicle-assignment-status";
+  static String getCurrentTransportPlan =
+      "${databaseUrl}transport/plans/current";
+  static String getRouteStops = "${databaseUrl}transport/routes/stops";
+  static String getLiveRoute = "${databaseUrl}transportation/live-route";
+  static String getTransportAttendanceList =
+      "${databaseUrl}transport/user/attendance-list";
+  static String getTransportRequests = "${databaseUrl}transport/requests";
+  static String storeTripReports = "${databaseUrl}transport/store-trip-reports";
 
   //
 

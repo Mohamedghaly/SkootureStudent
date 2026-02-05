@@ -18,6 +18,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 // ignore: avoid_classes_with_only_static_members
@@ -845,6 +846,25 @@ class Utils {
         print('Error parsing transaction date with ISO format: $dateString, Error: $e');
         return DateTime.now();
       }
+    }
+  }
+
+  /// Launch phone dialer with the given phone number
+  static Future<void> launchPhoneDialer(String phoneNumber) async {
+    if (phoneNumber.isEmpty) return;
+
+    // Clean the phone number (remove spaces, dashes, etc.)
+    final cleanedNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri(scheme: 'tel', path: cleanedNumber);
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        throw 'Could not launch phone dialer';
+      }
+    } catch (e) {
+      debugPrint('Error launching phone dialer: $e');
     }
   }
 }
