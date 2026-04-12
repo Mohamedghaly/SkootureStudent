@@ -41,12 +41,7 @@ class ParentLoginScreen extends StatefulWidget {
   @override
   State<ParentLoginScreen> createState() => _ParentLoginScreenState();
 
-  static Widget routeInstance() {
-    return BlocProvider<SignInCubit>(
-      child: const ParentLoginScreen(),
-      create: (_) => SignInCubit(AuthRepository()),
-    );
-  }
+  static Widget routeInstance() => const ParentLoginScreenProvider();
 }
 
 class _ParentLoginScreenState extends State<ParentLoginScreen>
@@ -409,7 +404,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                 );
                               } else {
                                 UnauthenticatedAccessManager().clearLastRoute();
-                                Get.offNamedUntil(Routes.parentOnbording,
+                                Get.offNamedUntil(Routes.parentHome,
                                     (Route<dynamic> route) => false);
                               }
                             } else if (state is SignInFailure) {

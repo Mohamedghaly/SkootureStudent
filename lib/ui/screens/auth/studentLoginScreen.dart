@@ -397,8 +397,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                               );
                             } else {
                               UnauthenticatedAccessManager().clearLastRoute();
-                              Get.offNamedUntil(Routes.studentOnbording,
-                                  (Route<dynamic> route) => false);
+                              Get.offNamedUntil(
+                                  Routes.home, (Route<dynamic> route) => false);
                             }
                           } else if (state is SignInFailure) {
                             Utils.showCustomSnackBar(

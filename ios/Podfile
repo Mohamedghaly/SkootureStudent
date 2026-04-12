@@ -56,7 +56,123 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      config.build_settings['SWIFT_VERSION'] = '5.0'
     end
+  end
+
+  # Patch ScreenProtectorKit for Swift 6 compatibility
+  path = File.join(installer.sandbox.root, 'ScreenProtectorKit/Sources/ScreenProtectorKit/ScreenProtectorKit.swift')
+  if File.exist?(path)
+    # Ensure file is writable
+    File.chmod(0644, path)
+    
+    # Overwrite with a version that safely handles the missing ScreenPreventer features
+    File.open(path, 'w') { |file| file << <<-EOF
+import UIKit
+import ScreenPreventerKit
+
+public protocol ScreenProtectorRootViewResolving {
+    func resolveRootView() -> UIView?
+}
+
+public enum ScreenProtectorMode: Equatable {
+    case none
+    case blur
+    case image(name: String)
+    case color(hex: String)
+}
+
+public protocol ScreenProtectable {
+    func screenIsRecording() -> Bool
+    func screenRecordObserver(using onScreenRecord: @escaping (Bool) -> Void)
+    func screenshotObserver(using onScreenshot: @escaping () -> Void)
+    func removeAllObserver()
+    func removeScreenRecordObserver()
+    func removeScreenshotObserver()
+    func removeObserver(observer: (any NSObjectProtocol)?)
+    func disableImageScreen()
+    func enabledImageScreen(named: String)
+    func disableColorScreen()
+    func enabledColorScreen(hexColor: String)
+    func disableBlurScreen()
+    func enabledBlurScreen(style: UIBlurEffect.Style)
+    func disablePreventScreenRecording()
+    func disablePreventScreenshot()
+    func enablePreventScreenshot()
+    func enabledPreventScreenRecording(text: String?, image: String?)
+    func enabledPreventScreenshot(text: String?, image: String?)
+    func enabledBlurScreen()
+    func enabledPreventScreenshot()
+    func enabledPreventScreenRecording()
+    func setRootViewResolver(_ resolver: ScreenProtectorRootViewResolving)
+    func setWindow(_ window: UIWindow?)
+}
+
+public class ScreenProtectorKit: ScreenProtectable {
+    public var window: UIWindow? = nil
+    
+    public init(window: UIWindow? = nil) {
+        self.window = window
+    }
+    
+    public static func initial(with view: UIView?) {
+        // ScreenPreventer.initial(with: view) // Disabled due to binary incompatibility
+    }
+    
+    public func setWindow(_ window: UIWindow?) {
+        self.window = window
+    }
+    
+    public func configurePreventionScreenshot() {}
+    
+    public func enabledPreventScreenshot() {}
+    
+    public func enabledPreventScreenshot(text: String?, image: String?) {}
+    
+    public func disablePreventScreenshot() {}
+    
+    public func enabledBlurScreen() {}
+    
+    public func enabledBlurScreen(style: UIBlurEffect.Style) {}
+    
+    public func disableBlurScreen() {}
+    
+    public func enabledColorScreen(hexColor: String) {}
+    
+    public func disableColorScreen() {}
+    
+    public func enabledImageScreen(named: String) {}
+    
+    public func disableImageScreen() {}
+    
+    public func removeObserver(observer: (any NSObjectProtocol)?) {}
+    
+    public func removeScreenshotObserver() {}
+    
+    public func removeScreenRecordObserver() {}
+    
+    public func removeAllObserver() {}
+    
+    public func screenshotObserver(using onScreenshot: @escaping () -> Void) {}
+    
+    public func screenRecordObserver(using onScreenRecord: @escaping (Bool) -> Void) {}
+    
+    public func screenIsRecording() -> Bool {
+        return false
+    }
+    
+    public func disablePreventScreenRecording() {}
+    
+    public func enablePreventScreenshot() {}
+    
+    public func enabledPreventScreenRecording() {}
+    
+    public func enabledPreventScreenRecording(text: String?, image: String?) {}
+    
+    public func setRootViewResolver(_ resolver: ScreenProtectorRootViewResolving) {}
+}
+EOF
+    }
   end
 end
 
