@@ -20,6 +20,8 @@ import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class Utils {
@@ -866,6 +868,101 @@ class Utils {
     } catch (e) {
       debugPrint('Error launching phone dialer: $e');
     }
+  }
+
+  static Future<void> showImagePreview({
+    required BuildContext context,
+    required String imageUrl,
+    String? heroTag,
+  }) async {
+    if (imageUrl.trim().isEmpty) {
+      return;
+    }
+
+    await showGeneralDialog(
+      context: context,
+      barrierLabel: 'image_preview',
+      barrierDismissible: true,
+      barrierColor: Colors.black.withValues(alpha: 0.85),
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (_, __, ___) {
+        return _ImagePreviewDialog(
+          imageUrl: imageUrl,
+          heroTag: heroTag,
+        );
+      },
+    );
+  }
+}
+
+class _ImagePreviewDialog extends StatelessWidget {
+  final String imageUrl;
+  final String? heroTag;
+
+  const _ImagePreviewDialog({
+    required this.imageUrl,
+    this.heroTag,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Center(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: heroTag != null
+                  ? Hero(
+                      tag: heroTag!,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => Center(
+                          child: CustomCircularProgressIndicator(
+                            indicatorColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Icon(
+                          Icons.error,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.contain,
+                      placeholder: (context, url) => Center(
+                        child: CustomCircularProgressIndicator(
+                          indicatorColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => const Icon(
+                        Icons.error,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 20,
+            child: IconButton(
+              icon: const Icon(
+                Icons.close,
+                color: Colors.white,
+                size: 30,
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:eschool/data/models/result.dart';
+import 'package:eschool/data/repositories/authRepository.dart';
 import 'package:eschool/data/repositories/studentRepository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,12 +54,28 @@ class ResultsCubit extends Cubit<ResultsState> {
 
   ResultsCubit(this._studentRepository) : super(ResultsInitial());
 
-  Future<void> fetchResults({required bool useParentApi, int? childId}) async {
+  List<Result> results() {
+    if (state case ResultsFetchSuccess res) {
+      return res.results;
+    }
+    return [];
+  }
+
+  Future<void> fetchResults({
+    required bool useParentApi,
+    int? childId,
+    int? examId,
+    int? resultId,
+    int? sessionYearId,
+  }) async {
     try {
       emit(ResultsFetchInProgress());
       final result = await _studentRepository.fetchExamResults(
-        childId: childId ?? 0,
+        childId: childId ?? AuthRepository.getStudentDetails().id ?? 0,
         useParentApi: useParentApi,
+        examId: examId,
+        resultId: resultId,
+        sessionYearId: sessionYearId,
       );
 
       emit(
@@ -83,8 +100,11 @@ class ResultsCubit extends Cubit<ResultsState> {
     return false;
   }
 
-  Future<void> fetchMoreResults(
-      {required bool useParentApi, int? childId,}) async {
+  Future<void> fetchMoreResults({
+    required bool useParentApi,
+    int? childId,
+    int? sessionYearId,
+  }) async {
     if (state is ResultsFetchSuccess) {
       if ((state as ResultsFetchSuccess).fetchMoreResultsInProgress) {
         return;
@@ -99,6 +119,7 @@ class ResultsCubit extends Cubit<ResultsState> {
           childId: childId ?? 0,
           useParentApi: useParentApi,
           page: (state as ResultsFetchSuccess).currentPage + 1,
+          sessionYearId: sessionYearId,
         );
 
         final currentState = state as ResultsFetchSuccess;
@@ -125,5 +146,15 @@ class ResultsCubit extends Cubit<ResultsState> {
         );
       }
     }
+  }
+
+  emitResultData(Result result) {
+    emit(ResultsFetchSuccess(
+      results: [result],
+      fetchMoreResultsInProgress: false,
+      moreResultsFetchError: false,
+      currentPage: 1,
+      totalPage: 1,
+    ));
   }
 }

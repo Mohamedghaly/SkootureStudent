@@ -13,41 +13,52 @@ class SchoolSettings {
   final String? onlineExamTermsAndCondition;
   final String? currencyCode;
   final String? currencySymbol;
+  final String? privacyPolicy;
+  final String? termsCondition;
+  final String? refundCancellation;
 
-  SchoolSettings(
-      {this.schoolName,
-      this.onlineExamTermsAndCondition,
-      this.schoolEmail,
-      this.schoolPhone,
-      this.schoolTagline,
-      this.schoolAddress,
-      this.horizontalLogo,
-      this.verticalLogo,
-      this.timetableStartTime,
-      this.timetableEndTime,
-      this.timetableDuration,
-      this.autoRenewalPlan,
-      this.currencyCode,
-      this.currencySymbol});
+  SchoolSettings({
+    this.schoolName,
+    this.onlineExamTermsAndCondition,
+    this.schoolEmail,
+    this.schoolPhone,
+    this.schoolTagline,
+    this.schoolAddress,
+    this.horizontalLogo,
+    this.verticalLogo,
+    this.timetableStartTime,
+    this.timetableEndTime,
+    this.timetableDuration,
+    this.autoRenewalPlan,
+    this.currencyCode,
+    this.currencySymbol,
+    this.privacyPolicy,
+    this.termsCondition,
+    this.refundCancellation,
+  });
 
-  SchoolSettings copyWith(
-      {String? schoolName,
-      String? schoolEmail,
-      String? schoolPhone,
-      String? schoolTagline,
-      String? schoolAddress,
-      String? horizontalLogo,
-      String? verticalLogo,
-      String? timetableStartTime,
-      String? timetableEndTime,
-      String? timetableDuration,
-      String? autoRenewalPlan,
-      String? onlineExamTermsAndCondition,
-      String? currencyCode,
-      String? currencySymbol}) {
+  SchoolSettings copyWith({
+    String? schoolName,
+    String? schoolEmail,
+    String? schoolPhone,
+    String? schoolTagline,
+    String? schoolAddress,
+    String? horizontalLogo,
+    String? verticalLogo,
+    String? timetableStartTime,
+    String? timetableEndTime,
+    String? timetableDuration,
+    String? autoRenewalPlan,
+    String? onlineExamTermsAndCondition,
+    String? currencyCode,
+    String? currencySymbol,
+    String? privacyPolicy,
+    String? termsCondition,
+    String? refundCancellation,
+  }) {
     return SchoolSettings(
-      currencyCode: currencyCode,
-      currencySymbol: currencySymbol,
+      currencyCode: currencyCode ?? this.currencyCode,
+      currencySymbol: currencySymbol ?? this.currencySymbol,
       onlineExamTermsAndCondition:
           onlineExamTermsAndCondition ?? this.onlineExamTermsAndCondition,
       schoolName: schoolName ?? this.schoolName,
@@ -61,6 +72,9 @@ class SchoolSettings {
       timetableEndTime: timetableEndTime ?? this.timetableEndTime,
       timetableDuration: timetableDuration ?? this.timetableDuration,
       autoRenewalPlan: autoRenewalPlan ?? this.autoRenewalPlan,
+      privacyPolicy: privacyPolicy ?? this.privacyPolicy,
+      termsCondition: termsCondition ?? this.termsCondition,
+      refundCancellation: refundCancellation ?? this.refundCancellation,
     );
   }
 
@@ -79,7 +93,10 @@ class SchoolSettings {
         timetableDuration = json['timetable_duration'] as String?,
         currencyCode = json['currency_code'] as String?,
         currencySymbol = json['currency_symbol'] as String?,
-        autoRenewalPlan = json['auto_renewal_plan'] as String?;
+        autoRenewalPlan = json['auto_renewal_plan'] as String?,
+        privacyPolicy = json['privacy_policy'] as String?,
+        termsCondition = json['terms_condition'] as String?,
+        refundCancellation = json['refund_cancellation'] as String?;
 
   Map<String, dynamic> toJson() => {
         'school_name': schoolName,
@@ -95,6 +112,9 @@ class SchoolSettings {
         'auto_renewal_plan': autoRenewalPlan,
         'online_exam_terms_condition': onlineExamTermsAndCondition,
         'currency_code': currencyCode,
-        'currency_symbol': currencySymbol
+        'currency_symbol': currencySymbol,
+        'privacy_policy': privacyPolicy,
+        'terms_condition': termsCondition,
+        'refund_cancellation': refundCancellation,
       };
 }

@@ -1,0 +1,880 @@
+=== lib/ui/screens/parentHomeScreen.dart ===
+--- /Users/mohamedghaly/Desktop/SkootureStdentApp/SkootureStudent/lib/ui/screens/parentHomeScreen.dart	2026-04-12 00:59:43
++++ /Users/mohamedghaly/Desktop/SkootureStdentApp/e-school-saas/e-school-saas/lib/ui/screens/parentHomeScreen.dart	2026-04-06 12:36:45
+@@ -4,9 +4,7 @@
+ import 'package:eschool/cubits/schoolConfigurationCubit.dart';
+ import 'package:eschool/cubits/slidersCubit.dart';
+ import 'package:eschool/cubits/socketSettingCubit.dart';
+-import 'package:eschool/data/models/notificationDetails.dart';
+ import 'package:eschool/data/models/student.dart';
+-import 'package:eschool/data/repositories/notificationRepository.dart';
+ import 'package:eschool/data/repositories/schoolRepository.dart';
+ import 'package:eschool/ui/screens/home/widgets/homeContainerTopProfileContainer.dart';
+ import 'package:eschool/ui/widgets/appUnderMaintenanceContainer.dart';
+@@ -14,7 +12,10 @@
+ import 'package:eschool/ui/widgets/customRoundedButton.dart';
+ import 'package:eschool/ui/widgets/errorContainer.dart';
+ import 'package:eschool/ui/widgets/forceUpdateDialogContainer.dart';
++import 'package:eschool/ui/widgets/customShimmerContainer.dart';
+ import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
++import 'package:eschool/ui/widgets/noDataContainer.dart';
++import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
+ import 'package:eschool/ui/widgets/svgButton.dart';
+ import 'package:eschool/utils/animationConfiguration.dart';
+ import 'package:eschool/utils/labelKeys.dart';
+@@ -44,53 +45,46 @@
+     with WidgetsBindingObserver {
+   var canPop = false;
+ 
++  /// Returns true if the parent has at least one child assigned.
++  bool _hasChildren() {
++    final children = context.read<AuthCubit>().getParentDetails().children;
++    return children != null && children.isNotEmpty;
++  }
++
+   @override
+   void initState() {
+     WidgetsBinding.instance.addObserver(this);
+ 
+     Future.delayed(Duration.zero, () {
+-      loadTemporarilyStoredNotifications();
+       _fetchSchoolConfiguration();
+       NotificationUtility.setUpNotificationService();
+     });
+     super.initState();
+-  }
+-
+-  void loadTemporarilyStoredNotifications() {
+-    NotificationRepository.getTemporarilyStoredNotifications()
+-        .then((notifications) {
+-      //
+-      for (var notificationData in notifications) {
+-        NotificationRepository.addNotification(
+-            notificationDetails:
+-                NotificationDetails.fromJson(Map.from(notificationData)));
+-      }
+-      //
+-      if (notifications.isNotEmpty) {
+-        NotificationRepository.clearTemporarilyNotification();
+-      }
+-
+-      //
+-    });
+   }
+ 
+   @override
+   void didChangeAppLifecycleState(AppLifecycleState state) {
+     super.didChangeAppLifecycleState(state);
+ 
++    // When app resumes from background, recheck notification permissions
++    // This handles the case where user manually enables notifications in Settings
+     if (state == AppLifecycleState.resumed) {
+-      loadTemporarilyStoredNotifications();
++      NotificationUtility.recheckNotificationPermissions();
++
++      // Reconnect WebSocket to pick up messages sent while app was in background
++      if (_hasChildren() &&
++          Utils.isModuleEnabled(
++              context: context, moduleId: chatModuleId.toString())) {
++        context.read<SocketSettingCubit>().reconnect();
++      }
+     }
+   }
+ 
+   void _fetchSchoolConfiguration() {
+-    var firstChildId = context
+-            .read<AuthCubit>()
+-            .getParentDetails()
+-            .children
+-            ?.firstOrNull
+-            ?.id ??
+-        0;
++    if (!_hasChildren()) return;
++
++    final firstChildId =
++        context.read<AuthCubit>().getParentDetails().children!.first.id ?? 0;
+     context
+         .read<SchoolConfigurationCubit>()
+         .fetchSchoolConfiguration(useParentApi: true, childId: firstChildId);
+@@ -418,7 +412,7 @@
+         ],
+       ),
+     );
+-  }    
++  }
+ 
+   void _onWillPop() {
+     setState(() {
+@@ -436,6 +430,169 @@
+     });
+   }
+ 
++  Future<void> _refreshParentData() async {
++    try {
++      // Call the new API to get updated parent data
++      await context.read<AuthCubit>().updateParentDetails();
++
++      if (mounted) setState(() {});
++
++      if (!_hasChildren()) return;
++
++      // Refresh school configuration to get latest data
++      final firstChildId =
++          context.read<AuthCubit>().getParentDetails().children!.first.id ?? 0;
++
++      await context.read<SchoolConfigurationCubit>().fetchSchoolConfiguration(
++            useParentApi: true,
++            childId: firstChildId,
++          );
++    } catch (e) {
++      if (mounted) {
++        Utils.showCustomSnackBar(
++          context: context,
++          errorMessage: e.toString(),
++          backgroundColor: Theme.of(context).colorScheme.error,
++        );
++      }
++    }
++  }
++
++  Widget _buildAppBarShimmer() {
++    final width = MediaQuery.of(context).size.width;
++    return ShimmerLoadingContainer(
++      child: Container(
++        width: width,
++        height: MediaQuery.of(context).size.height *
++            Utils.appBarMediumtHeightPercentage,
++        decoration: BoxDecoration(
++          color: Colors.white,
++          borderRadius: const BorderRadius.only(
++            bottomLeft: Radius.circular(25),
++            bottomRight: Radius.circular(25),
++          ),
++        ),
++        padding: EdgeInsetsDirectional.only(
++          start: width * 0.056,
++          end: width * 0.02,
++          top: MediaQuery.of(context).padding.top + 10,
++        ),
++        child: Row(
++          children: [
++            CustomShimmerContainer(
++              width: 65,
++              height: 65,
++              borderRadius: 32.5,
++            ),
++            SizedBox(width: width * 0.04),
++            Column(
++              mainAxisSize: MainAxisSize.min,
++              crossAxisAlignment: CrossAxisAlignment.start,
++              children: [
++                CustomShimmerContainer(
++                  width: width * 0.35,
++                  height: 18,
++                  borderRadius: 4,
++                ),
++                const SizedBox(height: 10),
++                CustomShimmerContainer(
++                  width: width * 0.45,
++                  height: 12,
++                  borderRadius: 3,
++                ),
++              ],
++            ),
++            const Spacer(),
++            CustomShimmerContainer(
++              width: 24,
++              height: 24,
++              borderRadius: 12,
++            ),
++            const SizedBox(width: 12),
++            CustomShimmerContainer(
++              width: 24,
++              height: 24,
++              borderRadius: 12,
++            ),
++          ],
++        ),
++      ),
++    );
++  }
++
++  Widget _buildChildrenShimmer() {
++    final width = MediaQuery.of(context).size.width;
++    return Padding(
++      padding: EdgeInsets.symmetric(horizontal: width * 0.075),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          const SizedBox(height: 20),
++          LayoutBuilder(
++            builder: (context, boxConstraints) {
++              return Wrap(
++                spacing: boxConstraints.maxWidth * 0.05,
++                runSpacing: 32.5,
++                children: List.generate(
++                  4,
++                  (index) => ShimmerLoadingContainer(
++                    child: CustomShimmerContainer(
++                      width: boxConstraints.maxWidth * 0.45,
++                      height: 150,
++                      borderRadius: 20,
++                    ),
++                  ),
++                ),
++              );
++            },
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildShimmerLoading() {
++    return SingleChildScrollView(
++      child: Column(
++        children: [
++          _buildAppBarShimmer(),
++          const SizedBox(height: 25),
++          _buildChildrenShimmer(),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildNoChildrenScreen() {
++    return RefreshIndicator(
++      onRefresh: _refreshParentData,
++      color: Theme.of(context).colorScheme.primary,
++      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
++      child: Stack(
++        children: [
++          SingleChildScrollView(
++            physics: const AlwaysScrollableScrollPhysics(),
++            padding: EdgeInsets.only(
++              top: Utils.getScrollViewTopPadding(
++                context: context,
++                appBarHeightPercentage: Utils.appBarMediumtHeightPercentage,
++              ),
++            ),
++            child: SizedBox(
++              height: MediaQuery.of(context).size.height * 0.6,
++              child: Center(
++                child: NoDataContainer(
++                  titleKey: noChildrenFoundKey,
++                ),
++              ),
++            ),
++          ),
++          _buildAppBar(),
++        ],
++      ),
++    );
++  }
++
+   @override
+   Widget build(BuildContext context) {
+     return PopScope(
+@@ -448,104 +605,122 @@
+       child: Scaffold(
+         body: context.read<AppConfigurationCubit>().appUnderMaintenance()
+             ? const AppUnderMaintenanceContainer()
+-            : BlocConsumer<SchoolConfigurationCubit, SchoolConfigurationState>(
+-                listener: (context, state) {
+-                  if (state is SchoolConfigurationFetchSuccess) {
+-                    if (Utils.isModuleEnabled(
+-                        context: context, moduleId: chatModuleId.toString())) {
+-                      context.read<SocketSettingCubit>().init(
+-                          userId:
+-                              context.read<AuthCubit>().getParentDetails().id ??
++            : !_hasChildren()
++                ? _buildNoChildrenScreen()
++                : BlocConsumer<SchoolConfigurationCubit,
++                    SchoolConfigurationState>(
++                    listener: (context, state) {
++                      if (state is SchoolConfigurationFetchSuccess) {
++                        if (Utils.isModuleEnabled(
++                            context: context,
++                            moduleId: chatModuleId.toString())) {
++                          context.read<SocketSettingCubit>().init(
++                              userId: context
++                                      .read<AuthCubit>()
++                                      .getParentDetails()
++                                      .id ??
+                                   0);
+-                    }
+-                  }
+-                },
+-                builder: (context, state) {
+-                  if (state is SchoolConfigurationFetchSuccess) {
+-                    return Stack(
+-                      children: [
+-                        Align(
+-                          alignment: Alignment.topCenter,
+-                          child: SingleChildScrollView(
+-                            padding: EdgeInsets.only(
+-                              bottom: 50,
+-                              top: Utils.getScrollViewTopPadding(
+-                                context: context,
+-                                appBarHeightPercentage:
+-                                    Utils.appBarMediumtHeightPercentage,
++                        }
++
++                        // Process pending notification after app is fully initialized
++                        // This handles notifications when app was opened from terminated state
++                        if (NotificationUtility.hasPendingNotification) {
++                          Future.delayed(const Duration(milliseconds: 500), () {
++                            NotificationUtility.processPendingNotification();
++                          });
++                        }
++                      }
++                    },
++                    builder: (context, state) {
++                      if (state is SchoolConfigurationFetchSuccess) {
++                        return RefreshIndicator(
++                          onRefresh: _refreshParentData,
++                          color: Theme.of(context).colorScheme.primary,
++                          backgroundColor:
++                              Theme.of(context).scaffoldBackgroundColor,
++                          child: Stack(
++                            children: [
++                              Align(
++                                alignment: Alignment.topCenter,
++                                child: SingleChildScrollView(
++                                  physics:
++                                      const AlwaysScrollableScrollPhysics(),
++                                  padding: EdgeInsets.only(
++                                    bottom: 50,
++                                    top: Utils.getScrollViewTopPadding(
++                                      context: context,
++                                      appBarHeightPercentage:
++                                          Utils.appBarMediumtHeightPercentage,
++                                    ),
++                                  ),
++                                  child: Column(
++                                    children: [
++                                      _buildChildrenContainer(),
++                                    ],
++                                  ),
++                                ),
+                               ),
+-                            ),
+-                            child: Column(
+-                              children: [
+-                                _buildChildrenContainer(),
+-                              ],
+-                            ),
+-                          ),
+-                        ),
+-                        _buildAppBar(),
+-                        //Check forece update here
+-                        context.read<AppConfigurationCubit>().forceUpdate()
+-                            ? FutureBuilder<bool>(
+-                                future: Utils.forceUpdate(
+-                                  context
++                              _buildAppBar(),
++                              //Check force update here
++                              context
+                                       .read<AppConfigurationCubit>()
+-                                      .getAppVersion(),
+-                                ),
+-                                builder: (context, snaphsot) {
+-                                  if (snaphsot.hasData) {
+-                                    return (snaphsot.data ?? false)
+-                                        ? const ForceUpdateDialogContainer()
+-                                        : const SizedBox();
+-                                  }
++                                      .forceUpdate()
++                                  ? FutureBuilder<bool>(
++                                      future: Utils.forceUpdate(
++                                        context
++                                            .read<AppConfigurationCubit>()
++                                            .getAppVersion(),
++                                      ),
++                                      builder: (context, snaphsot) {
++                                        if (snaphsot.hasData) {
++                                          return (snaphsot.data ?? false)
++                                              ? const ForceUpdateDialogContainer()
++                                              : const SizedBox();
++                                        }
+ 
+-                                  return const SizedBox();
++                                        return const SizedBox();
++                                      },
++                                    )
++                                  : const SizedBox(),
++                            ],
++                          ),
++                        );
++                      }
++
++                      if (state is SchoolConfigurationFetchFailure) {
++                        return Center(
++                          child: Column(
++                            children: [
++                              HomeContainerTopProfileContainer(),
++                              const SizedBox(height: 15),
++                              ErrorContainer(
++                                errorMessageCode: state.errorMessage,
++                                onTapRetry: _fetchSchoolConfiguration,
++                              ),
++                              const SizedBox(height: 20),
++                              CustomRoundedButton(
++                                height: 40,
++                                widthPercentage: 0.3,
++                                backgroundColor:
++                                    Theme.of(context).colorScheme.primary,
++                                onTap: () {
++                                  Get.toNamed(Routes.settings);
+                                 },
++                                titleColor:
++                                    Theme.of(context).scaffoldBackgroundColor,
++                                buttonTitle:
++                                    Utils.getTranslatedLabel(settingsKey),
++                                showBorder: false,
+                               )
+-                            : const SizedBox(),
+-                      ],
+-                    );
+-                  }
+-                  if (state is SchoolConfigurationFetchFailure) {
+-                    return Center(
+-                      child: Column(
+-                        children: [
+-                          HomeContainerTopProfileContainer(),
+-                          const SizedBox(height: 15),
+-                          ErrorContainer(
+-                            errorMessageCode: state.errorMessage,
+-                            onTapRetry: _fetchSchoolConfiguration,
++                            ],
+                           ),
+-                          const SizedBox(height: 20),
+-                          CustomRoundedButton(
+-                            height: 40,
+-                            widthPercentage: 0.3,
+-                            backgroundColor:
+-                                Theme.of(context).colorScheme.primary,
+-                            onTap: () {
+-                              Get.toNamed(Routes.settings);
+-                            },
+-                            titleColor:
+-                                Theme.of(context).scaffoldBackgroundColor,
+-                            buttonTitle: Utils.getTranslatedLabel(settingsKey),
+-                            showBorder: false,
+-                          )
+-                        ],
+-                      ),
+-                    );
+-                  }
++                        );
++                      }
+ 
+-                  return const SizedBox();
+-                  // return Column(
+-                  //   children: [
+-                  //     HomeContainerTopProfileContainer(),
+-                  //     Expanded(
+-                  //         child: HomeScreenDataLoadingContainer(
+-                  //       addTopPadding: false,
+-                  //     )),
+-                  //   ],
+-                  // );
+-                },
+-              ),
++                      // Initial loading state - show shimmer
++                      return _buildShimmerLoading();
++                    },
++                  ),
+       ),
+     );
+   }
+=== lib/ui/widgets/resultsContainer.dart ===
+--- /Users/mohamedghaly/Desktop/SkootureStdentApp/SkootureStudent/lib/ui/widgets/resultsContainer.dart	2026-04-12 00:24:17
++++ /Users/mohamedghaly/Desktop/SkootureStdentApp/e-school-saas/e-school-saas/lib/ui/widgets/resultsContainer.dart	2026-04-06 12:36:45
+@@ -7,10 +7,12 @@
+ import 'package:eschool/cubits/resultTabSelectionCubit.dart';
+ import 'package:eschool/cubits/resultsCubit.dart';
+ import 'package:eschool/cubits/resultsOnlineCubit.dart';
++import 'package:eschool/cubits/schoolSessionYearsCubit.dart';
+ import 'package:eschool/cubits/studentSubjectAndSlidersCubit.dart';
+ 
+ import 'package:eschool/data/models/result.dart';
+ import 'package:eschool/data/models/resultOnline.dart';
++import 'package:eschool/data/models/sessionYear.dart';
+ import 'package:eschool/data/models/subject.dart';
+ 
+ import 'package:eschool/ui/widgets/assignmentsSubjectsContainer.dart';
+@@ -24,6 +26,7 @@
+ import 'package:eschool/ui/widgets/noDataContainer.dart';
+ import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
+ import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
++import 'package:eschool/ui/widgets/svgButton.dart';
+ import 'package:eschool/ui/widgets/tabBarBackgroundContainer.dart';
+ 
+ import 'package:eschool/utils/labelKeys.dart';
+@@ -44,21 +47,30 @@
+ class _ResultsContainerState extends State<ResultsContainer> {
+   late final ScrollController _scrollController = ScrollController()
+     ..addListener(_resultsScrollListener);
+-  //same for both Online and Offline Result
+ 
++  List<SessionYear> _sessionYears = [];
++  SessionYear? _selectedSessionYear;
++
+   @override
+   void initState() {
+     Future.delayed(Duration.zero, () {
+-      fetchResults();
+-      fetchOnlineResults();
++      _fetchSessionYears();
+     });
+     super.initState();
+   }
+ 
++  void _fetchSessionYears() {
++    context.read<SchoolSessionYearsCubit>().fetchSessionYears(
++          useParentApi: context.read<AuthCubit>().isParent(),
++          childId: widget.childId ?? 0,
++        );
++  }
++
+   void fetchResults() {
+     context.read<ResultsCubit>().fetchResults(
+           useParentApi: context.read<AuthCubit>().isParent(),
+           childId: widget.childId,
++          sessionYearId: _selectedSessionYear?.id,
+         );
+   }
+ 
+@@ -74,6 +86,7 @@
+                     .read<ResultTabSelectionCubit>()
+                     .state
+                     .resultFilterByClassSubjectId,
++                sessionYearId: _selectedSessionYear?.id,
+               );
+           //to scroll to last in order for users to see the progress
+           Future.delayed(const Duration(milliseconds: 10), () {
+@@ -89,6 +102,7 @@
+           context.read<ResultsCubit>().fetchMoreResults(
+                 useParentApi: context.read<AuthCubit>().isParent(),
+                 childId: widget.childId,
++                sessionYearId: _selectedSessionYear?.id,
+               );
+           //to scroll to last in order for users to see the progress
+           Future.delayed(const Duration(milliseconds: 10), () {
+@@ -110,6 +124,32 @@
+     super.dispose();
+   }
+ 
++  void _onTapFilterButton() {
++    if (_sessionYears.isEmpty) return;
++
++    showModalBottomSheet(
++      shape: RoundedRectangleBorder(
++        borderRadius: BorderRadius.only(
++          topLeft: Radius.circular(Utils.bottomSheetTopRadius),
++          topRight: Radius.circular(Utils.bottomSheetTopRadius),
++        ),
++      ),
++      context: context,
++      builder: (_) => _SessionYearFilterSheet(
++        sessionYears: _sessionYears,
++        selectedSessionYear: _selectedSessionYear,
++        onSessionYearSelected: (sessionYear) {
++          setState(() {
++            _selectedSessionYear = sessionYear;
++          });
++          Navigator.of(context).pop();
++          fetchResults();
++          fetchOnlineResults();
++        },
++      ),
++    );
++  }
++
+   Widget _buildAppBar(ResultTabSelectionState currentState) {
+     return ScreenTopBackgroundContainer(
+       child: LayoutBuilder(
+@@ -133,6 +173,18 @@
+                   ),
+                 ),
+               ),
++              Align(
++                alignment: AlignmentDirectional.topEnd,
++                child: Padding(
++                  padding: EdgeInsetsDirectional.only(
++                    end: Utils.screenContentHorizontalPadding,
++                  ),
++                  child: SvgButton(
++                    onTap: _onTapFilterButton,
++                    svgIconUrl: Utils.getImagePath("filter_icon.svg"),
++                  ),
++                ),
++              ),
+               AnimatedAlign(
+                 curve: Utils.tabBackgroundContainerAnimationCurve,
+                 duration: Utils.tabBackgroundContainerAnimationDuration,
+@@ -239,6 +291,7 @@
+                 context.read<ResultsCubit>().fetchMoreResults(
+                       useParentApi: context.read<AuthCubit>().isParent(),
+                       childId: widget.childId,
++                      sessionYearId: _selectedSessionYear?.id,
+                     );
+               },
+             ),
+@@ -355,6 +408,7 @@
+               .read<ResultTabSelectionCubit>()
+               .state
+               .resultFilterByClassSubjectId,
++          sessionYearId: _selectedSessionYear?.id,
+         );
+   }
+ 
+@@ -383,6 +437,7 @@
+                           .read<ResultTabSelectionCubit>()
+                           .state
+                           .resultFilterByClassSubjectId,
++                      sessionYearId: _selectedSessionYear?.id,
+                     );
+               },
+             ),
+@@ -504,20 +559,150 @@
+ 
+   @override
+   Widget build(BuildContext context) {
+-    return BlocBuilder<ResultTabSelectionCubit, ResultTabSelectionState>(
+-      builder: (context, state) {
+-        return Stack(
+-          children: [
+-            (context.read<ResultTabSelectionCubit>().isResultOnline())
+-                ? buildOnlineResults()
+-                : buildOfflineResults(),
+-            Align(
+-              alignment: Alignment.topCenter,
+-              child: _buildAppBar(state),
++    return BlocListener<SchoolSessionYearsCubit, SchoolSessionYearsState>(
++      listener: (context, sessionState) {
++        if (sessionState is SchoolSessionYearsFetchSuccess) {
++          _sessionYears = sessionState.sessionYears;
++          final defaultIndex =
++              _sessionYears.indexWhere((e) => e.isDefault == 1);
++          _selectedSessionYear = defaultIndex != -1
++              ? _sessionYears[defaultIndex]
++              : (_sessionYears.isNotEmpty ? _sessionYears.first : null);
++          setState(() {});
++          fetchResults();
++          fetchOnlineResults();
++        }
++      },
++      child: BlocBuilder<ResultTabSelectionCubit, ResultTabSelectionState>(
++        builder: (context, state) {
++          return Stack(
++            children: [
++              (context.read<ResultTabSelectionCubit>().isResultOnline())
++                  ? buildOnlineResults()
++                  : buildOfflineResults(),
++              Align(
++                alignment: Alignment.topCenter,
++                child: _buildAppBar(state),
++              ),
++            ],
++          );
++        },
++      ),
++    );
++  }
++}
++
++/// Private widget for session year filter bottom sheet.
++class _SessionYearFilterSheet extends StatefulWidget {
++  final List<SessionYear> sessionYears;
++  final SessionYear? selectedSessionYear;
++  final Function(SessionYear) onSessionYearSelected;
++
++  const _SessionYearFilterSheet({
++    required this.sessionYears,
++    required this.selectedSessionYear,
++    required this.onSessionYearSelected,
++  });
++
++  @override
++  State<_SessionYearFilterSheet> createState() =>
++      _SessionYearFilterSheetState();
++}
++
++class _SessionYearFilterSheetState extends State<_SessionYearFilterSheet> {
++  late SessionYear? _currentlySelected = widget.selectedSessionYear;
++
++  Widget _buildFilterTile({
++    required String title,
++    required SessionYear sessionYear,
++  }) {
++    final isSelected = _currentlySelected?.id == sessionYear.id;
++    return Padding(
++      padding: const EdgeInsets.symmetric(vertical: 10.0),
++      child: GestureDetector(
++        onTap: () {
++          setState(() {
++            _currentlySelected = sessionYear;
++          });
++          widget.onSessionYearSelected(sessionYear);
++        },
++        child: Row(
++          children: [
++            Container(
++              padding: const EdgeInsets.all(2),
++              width: 20,
++              height: 20,
++              decoration: BoxDecoration(
++                shape: BoxShape.circle,
++                border: Border.all(
++                  color: Theme.of(context).colorScheme.primary,
++                  width: 1.75,
++                ),
++              ),
++              child: Container(
++                decoration: BoxDecoration(
++                  shape: BoxShape.circle,
++                  color: isSelected
++                      ? Theme.of(context).colorScheme.primary
++                      : Theme.of(context).scaffoldBackgroundColor,
++                ),
++              ),
+             ),
++            const SizedBox(width: 15),
++            Text(
++              title,
++              style: TextStyle(
++                fontSize: 14,
++                color: Theme.of(context).colorScheme.secondary,
++              ),
++            ),
+           ],
+-        );
+-      },
++        ),
++      ),
+     );
+   }
++
++  @override
++  Widget build(BuildContext context) {
++    return Container(
++      padding: EdgeInsets.symmetric(
++        horizontal: MediaQuery.of(context).size.width * (0.075),
++        vertical: MediaQuery.of(context).size.height * (0.05),
++      ),
++      width: MediaQuery.of(context).size.width,
++      decoration: BoxDecoration(
++        color: Theme.of(context).scaffoldBackgroundColor,
++        borderRadius: BorderRadius.only(
++          topLeft: Radius.circular(Utils.bottomSheetTopRadius),
++          topRight: Radius.circular(Utils.bottomSheetTopRadius),
++        ),
++      ),
++      child: Column(
++        mainAxisSize: MainAxisSize.min,
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          Text(
++            Utils.getTranslatedLabel(sessionYearKey),
++            style: TextStyle(
++              fontSize: 16.0,
++              color: Theme.of(context).colorScheme.secondary,
++              fontWeight: FontWeight.bold,
++            ),
++          ),
++          Padding(
++            padding: const EdgeInsets.symmetric(vertical: 10.0),
++            child: Divider(
++              color: Theme.of(context).colorScheme.onSurface,
++            ),
++          ),
++          ...widget.sessionYears.map(
++            (sessionYear) => _buildFilterTile(
++              title: sessionYear.name ?? '',
++              sessionYear: sessionYear,
++            ),
++          ),
++        ],
++      ),
++    );
++  }
+ }
+=== lib/ui/widgets/settingsContainer.dart ===
+--- /Users/mohamedghaly/Desktop/SkootureStdentApp/SkootureStudent/lib/ui/widgets/settingsContainer.dart	2026-04-12 00:26:19
++++ /Users/mohamedghaly/Desktop/SkootureStdentApp/e-school-saas/e-school-saas/lib/ui/widgets/settingsContainer.dart	2026-04-06 12:36:45
+@@ -225,29 +225,30 @@
+           },
+           context: context,
+         ),
+-        // _buildSettingDetailsTile(
+-        //   icon: Icons.star,
+-        //   title: Utils.getTranslatedLabel(rateUsKey),
+-        //   onTap: () {
+-        //     _shareApp(context);
+-        //   },
+-        //   context: context,
+-        // ),
+-        // _buildSettingDetailsTile(
+-        //   icon: Icons.share,
+-        //   title: Utils.getTranslatedLabel(shareKey),
+-        //   onTap: () {
+-        //     _shareApp(context);
+-        //   },
+-        //   context: context,
+-        // ),
++        if (context.read<AppConfigurationCubit>().getAppLink().isNotEmpty)
++          _buildSettingDetailsTile(
++            icon: Icons.star,
++            title: Utils.getTranslatedLabel(rateUsKey),
++            onTap: () {
++              _shareApp(context);
++            },
++            context: context,
++          ),
++        if (context.read<AppConfigurationCubit>().getAppLink().isNotEmpty)
++          _buildSettingDetailsTile(
++            icon: Icons.share,
++            title: Utils.getTranslatedLabel(shareKey),
++            onTap: () {
++              _shareApp(context);
++            },
++            context: context,
++          ),
+       ],
+     );
+   }
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final appVersion = context.read<AppConfigurationCubit>().getAppVersion();
+     return Stack(
+       children: [
+         Align(
+@@ -271,16 +272,15 @@
+                 const SizedBox(
+                   height: 5.0,
+                 ),
+-                if (appVersion.isNotEmpty)
+-                  Text(
+-                    "${Utils.getTranslatedLabel(appVersionKey)}  $appVersion",
+-                    style: TextStyle(
+-                      color: Theme.of(context).colorScheme.onSurface,
+-                      fontWeight: FontWeight.w500,
+-                      fontSize: 11.0,
+-                    ),
+-                    textAlign: TextAlign.start,
++                Text(
++                  "${Utils.getTranslatedLabel(appVersionKey)}  ${context.read<AppConfigurationCubit>().getAppVersion()}",
++                  style: TextStyle(
++                    color: Theme.of(context).colorScheme.onSurface,
++                    fontWeight: FontWeight.w500,
++                    fontSize: 11.0,
+                   ),
++                  textAlign: TextAlign.start,
++                ),
+                 //extra height to avoide dashboard's bottom navigationbar
+                 SizedBox(
+                   height: MediaQuery.of(context).size.height *
+=== lib/utils/paymentWebview.dart ===

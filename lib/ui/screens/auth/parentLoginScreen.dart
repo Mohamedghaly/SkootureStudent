@@ -12,6 +12,7 @@ import 'package:eschool/ui/widgets/customTextFieldContainer.dart';
 import 'package:eschool/ui/widgets/passwordHideShowButton.dart';
 import 'package:eschool/utils/biometric_utils.dart';
 import 'package:eschool/utils/labelKeys.dart';
+import 'package:eschool/utils/unauthenticatedAccessManager.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -390,8 +391,27 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                     student: state.student,
                                   );
 
-                              Get.offNamedUntil(Routes.parentHome,
-                                  (Route<dynamic> route) => false);
+                              // Unblock API calls after re-authentication
+                              UnauthenticatedAccessManager()
+                                  .onUserAuthenticated();
+
+                              // Check if user was redirected here due to 401
+                              final lastRoute =
+                                  UnauthenticatedAccessManager().lastRoute;
+                              if (lastRoute != null &&
+                                  lastRoute != Routes.auth &&
+                                  lastRoute != Routes.studentLogin &&
+                                  lastRoute != Routes.parentLogin) {
+                                UnauthenticatedAccessManager().clearLastRoute();
+                                Get.offNamedUntil(
+                                  lastRoute,
+                                  (_) => false,
+                                );
+                              } else {
+                                UnauthenticatedAccessManager().clearLastRoute();
+                                Get.offNamedUntil(Routes.parentOnbording,
+                                    (Route<dynamic> route) => false);
+                              }
                             } else if (state is SignInFailure) {
                               Utils.showCustomSnackBar(
                                 context: context,

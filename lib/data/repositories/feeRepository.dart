@@ -6,13 +6,14 @@ import 'package:flutter/foundation.dart';
 class FeeRepository {
   //
   Future<List<ChildFeeDetails>> fetchChildFeeDetails(
-      {required int childId}) async {
+      {required int childId, int? sessionYearId}) async {
     try {
       final result = await Api.get(
         url: Api.getStudentFeesDetailParent,
         useAuthToken: true,
         queryParameters: {
           "child_id": childId,
+          if (sessionYearId != null) "session_year_id": sessionYearId,
         },
       );
       return ((result['data'] ?? []) as List)
@@ -20,7 +21,7 @@ class FeeRepository {
           .toList();
     } catch (e) {
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint(e.toString());
       }
       throw ApiException(e.toString());
     }
@@ -43,7 +44,7 @@ class FeeRepository {
       }, url: Api.payChildCompulsoryFees, useAuthToken: true);
 
       if (kDebugMode) {
-        print("API Response for $paymentMethod: $result");
+        debugPrint("API Response for $paymentMethod: $result");
       }
 
       // Extract payment transaction
@@ -57,7 +58,7 @@ class FeeRepository {
         data = Map<String, dynamic>.from(result['data'] ?? {});
 
         if (kDebugMode) {
-          print("Extracted payment data for $paymentMethod: $data");
+          debugPrint("Extracted payment data for $paymentMethod: $data");
         }
       } else {
         // For Stripe/Razorpay, extract payment_intent as before
@@ -68,7 +69,7 @@ class FeeRepository {
       return (paymentTransaction: paymentTransaction, data: data);
     } catch (e) {
       if (kDebugMode) {
-        print("Error in payCompulsoryFee: $e");
+        debugPrint("Error in payCompulsoryFee: $e");
       }
       throw ApiException(e.toString());
     }
@@ -89,7 +90,8 @@ class FeeRepository {
       }, url: Api.payChildOptionalFees, useAuthToken: true);
 
       if (kDebugMode) {
-        print("API Response for optional fees with $paymentMethod: $result");
+        debugPrint(
+            "API Response for optional fees with $paymentMethod: $result");
       }
 
       // Extract payment transaction
@@ -103,7 +105,7 @@ class FeeRepository {
         data = Map<String, dynamic>.from(result['data'] ?? {});
 
         if (kDebugMode) {
-          print("Extracted payment data for $paymentMethod: $data");
+          debugPrint("Extracted payment data for $paymentMethod: $data");
         }
       } else {
         // For Stripe/Razorpay, extract payment_intent as before
@@ -114,7 +116,7 @@ class FeeRepository {
       return (paymentTransaction: paymentTransaction, data: data);
     } catch (e) {
       if (kDebugMode) {
-        print("Error in payOptionalFees: $e");
+        debugPrint("Error in payOptionalFees: $e");
       }
       throw ApiException(e.toString());
     }

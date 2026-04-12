@@ -59,6 +59,7 @@ class ResultsOnlineCubit extends Cubit<ResultsOnlineState> {
     required int childId,
     required int classSubjectId,
     int? page,
+    int? sessionYearId,
   }) async {
     try {
       emit(ResultsOnlineFetchInProgress());
@@ -67,6 +68,7 @@ class ResultsOnlineCubit extends Cubit<ResultsOnlineState> {
         classSubjectId: classSubjectId,
         page: page,
         useParentApi: useParentApi,
+        sessionYearId: sessionYearId,
       );
 
       emit(
@@ -95,6 +97,7 @@ class ResultsOnlineCubit extends Cubit<ResultsOnlineState> {
     required bool useParentApi,
     required int childId,
     required int classSubjectId,
+    int? sessionYearId,
   }) async {
     if (state is ResultsOnlineFetchSuccess) {
       if ((state as ResultsOnlineFetchSuccess)
@@ -112,6 +115,7 @@ class ResultsOnlineCubit extends Cubit<ResultsOnlineState> {
           childId: childId,
           classSubjectId: classSubjectId,
           page: (state as ResultsOnlineFetchSuccess).currentPage + 1,
+          sessionYearId: sessionYearId,
         );
 
         final currentState = state as ResultsOnlineFetchSuccess;

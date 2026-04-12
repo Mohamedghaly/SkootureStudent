@@ -7,10 +7,12 @@ import 'package:eschool/cubits/authCubit.dart';
 import 'package:eschool/cubits/resultTabSelectionCubit.dart';
 import 'package:eschool/cubits/resultsCubit.dart';
 import 'package:eschool/cubits/resultsOnlineCubit.dart';
+import 'package:eschool/cubits/schoolSessionYearsCubit.dart';
 import 'package:eschool/cubits/studentSubjectAndSlidersCubit.dart';
 
 import 'package:eschool/data/models/result.dart';
 import 'package:eschool/data/models/resultOnline.dart';
+import 'package:eschool/data/models/sessionYear.dart';
 import 'package:eschool/data/models/subject.dart';
 
 import 'package:eschool/ui/widgets/assignmentsSubjectsContainer.dart';
@@ -24,6 +26,7 @@ import 'package:eschool/ui/widgets/listItemForOnlineExamAndOnlineResult.dart';
 import 'package:eschool/ui/widgets/noDataContainer.dart';
 import 'package:eschool/ui/widgets/screenTopBackgroundContainer.dart';
 import 'package:eschool/ui/widgets/shimmerLoadingContainer.dart';
+import 'package:eschool/ui/widgets/svgButton.dart';
 import 'package:eschool/ui/widgets/tabBarBackgroundContainer.dart';
 
 import 'package:eschool/utils/labelKeys.dart';
@@ -44,21 +47,30 @@ class ResultsContainer extends StatefulWidget {
 class _ResultsContainerState extends State<ResultsContainer> {
   late final ScrollController _scrollController = ScrollController()
     ..addListener(_resultsScrollListener);
-  //same for both Online and Offline Result
+
+  List<SessionYear> _sessionYears = [];
+  SessionYear? _selectedSessionYear;
 
   @override
   void initState() {
     Future.delayed(Duration.zero, () {
-      fetchResults();
-      fetchOnlineResults();
+      _fetchSessionYears();
     });
     super.initState();
+  }
+
+  void _fetchSessionYears() {
+    context.read<SchoolSessionYearsCubit>().fetchSessionYears(
+          useParentApi: context.read<AuthCubit>().isParent(),
+          childId: widget.childId ?? 0,
+        );
   }
 
   void fetchResults() {
     context.read<ResultsCubit>().fetchResults(
           useParentApi: context.read<AuthCubit>().isParent(),
           childId: widget.childId,
+          sessionYearId: _selectedSessionYear?.id,
         );
   }
 
@@ -74,6 +86,7 @@ class _ResultsContainerState extends State<ResultsContainer> {
                     .read<ResultTabSelectionCubit>()
                     .state
                     .resultFilterByClassSubjectId,
+                sessionYearId: _selectedSessionYear?.id,
               );
           //to scroll to last in order for users to see the progress
           Future.delayed(const Duration(milliseconds: 10), () {
@@ -89,6 +102,7 @@ class _ResultsContainerState extends State<ResultsContainer> {
           context.read<ResultsCubit>().fetchMoreResults(
                 useParentApi: context.read<AuthCubit>().isParent(),
                 childId: widget.childId,
+                sessionYearId: _selectedSessionYear?.id,
               );
           //to scroll to last in order for users to see the progress
           Future.delayed(const Duration(milliseconds: 10), () {
@@ -108,6 +122,32 @@ class _ResultsContainerState extends State<ResultsContainer> {
     _scrollController.removeListener(_resultsScrollListener);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onTapFilterButton() {
+    if (_sessionYears.isEmpty) return;
+
+    showModalBottomSheet(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(Utils.bottomSheetTopRadius),
+          topRight: Radius.circular(Utils.bottomSheetTopRadius),
+        ),
+      ),
+      context: context,
+      builder: (_) => _SessionYearFilterSheet(
+        sessionYears: _sessionYears,
+        selectedSessionYear: _selectedSessionYear,
+        onSessionYearSelected: (sessionYear) {
+          setState(() {
+            _selectedSessionYear = sessionYear;
+          });
+          Navigator.of(context).pop();
+          fetchResults();
+          fetchOnlineResults();
+        },
+      ),
+    );
   }
 
   Widget _buildAppBar(ResultTabSelectionState currentState) {
@@ -130,6 +170,18 @@ class _ResultsContainerState extends State<ResultsContainer> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       fontSize: Utils.screenTitleFontSize,
                     ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    end: Utils.screenContentHorizontalPadding,
+                  ),
+                  child: SvgButton(
+                    onTap: _onTapFilterButton,
+                    svgIconUrl: Utils.getImagePath("filter_icon.svg"),
                   ),
                 ),
               ),
@@ -239,6 +291,7 @@ class _ResultsContainerState extends State<ResultsContainer> {
                 context.read<ResultsCubit>().fetchMoreResults(
                       useParentApi: context.read<AuthCubit>().isParent(),
                       childId: widget.childId,
+                      sessionYearId: _selectedSessionYear?.id,
                     );
               },
             ),
@@ -355,6 +408,7 @@ class _ResultsContainerState extends State<ResultsContainer> {
               .read<ResultTabSelectionCubit>()
               .state
               .resultFilterByClassSubjectId,
+          sessionYearId: _selectedSessionYear?.id,
         );
   }
 
@@ -383,6 +437,7 @@ class _ResultsContainerState extends State<ResultsContainer> {
                           .read<ResultTabSelectionCubit>()
                           .state
                           .resultFilterByClassSubjectId,
+                      sessionYearId: _selectedSessionYear?.id,
                     );
               },
             ),
@@ -504,20 +559,150 @@ class _ResultsContainerState extends State<ResultsContainer> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ResultTabSelectionCubit, ResultTabSelectionState>(
-      builder: (context, state) {
-        return Stack(
+    return BlocListener<SchoolSessionYearsCubit, SchoolSessionYearsState>(
+      listener: (context, sessionState) {
+        if (sessionState is SchoolSessionYearsFetchSuccess) {
+          _sessionYears = sessionState.sessionYears;
+          final defaultIndex =
+              _sessionYears.indexWhere((e) => e.isDefault == 1);
+          _selectedSessionYear = defaultIndex != -1
+              ? _sessionYears[defaultIndex]
+              : (_sessionYears.isNotEmpty ? _sessionYears.first : null);
+          setState(() {});
+          fetchResults();
+          fetchOnlineResults();
+        }
+      },
+      child: BlocBuilder<ResultTabSelectionCubit, ResultTabSelectionState>(
+        builder: (context, state) {
+          return Stack(
+            children: [
+              (context.read<ResultTabSelectionCubit>().isResultOnline())
+                  ? buildOnlineResults()
+                  : buildOfflineResults(),
+              Align(
+                alignment: Alignment.topCenter,
+                child: _buildAppBar(state),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Private widget for session year filter bottom sheet.
+class _SessionYearFilterSheet extends StatefulWidget {
+  final List<SessionYear> sessionYears;
+  final SessionYear? selectedSessionYear;
+  final Function(SessionYear) onSessionYearSelected;
+
+  const _SessionYearFilterSheet({
+    required this.sessionYears,
+    required this.selectedSessionYear,
+    required this.onSessionYearSelected,
+  });
+
+  @override
+  State<_SessionYearFilterSheet> createState() =>
+      _SessionYearFilterSheetState();
+}
+
+class _SessionYearFilterSheetState extends State<_SessionYearFilterSheet> {
+  late SessionYear? _currentlySelected = widget.selectedSessionYear;
+
+  Widget _buildFilterTile({
+    required String title,
+    required SessionYear sessionYear,
+  }) {
+    final isSelected = _currentlySelected?.id == sessionYear.id;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _currentlySelected = sessionYear;
+          });
+          widget.onSessionYearSelected(sessionYear);
+        },
+        child: Row(
           children: [
-            (context.read<ResultTabSelectionCubit>().isResultOnline())
-                ? buildOnlineResults()
-                : buildOfflineResults(),
-            Align(
-              alignment: Alignment.topCenter,
-              child: _buildAppBar(state),
+            Container(
+              padding: const EdgeInsets.all(2),
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1.75,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).scaffoldBackgroundColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 15),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.secondary,
+              ),
             ),
           ],
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width * (0.075),
+        vertical: MediaQuery.of(context).size.height * (0.05),
+      ),
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(Utils.bottomSheetTopRadius),
+          topRight: Radius.circular(Utils.bottomSheetTopRadius),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            Utils.getTranslatedLabel(sessionYearKey),
+            style: TextStyle(
+              fontSize: 16.0,
+              color: Theme.of(context).colorScheme.secondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Divider(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          ...widget.sessionYears.map(
+            (sessionYear) => _buildFilterTile(
+              title: sessionYear.name ?? '',
+              sessionYear: sessionYear,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

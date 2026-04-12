@@ -49,7 +49,6 @@ class _SchoolGalleryWithSessionYearFilterContainerState
   void fetchSchoolGallerySessionYearWise() {
     context.read<SchoolGalleryCubit>().fetchSchoolGallery(
         useParentApi: context.read<AuthCubit>().isParent(),
-        childId: widget.student.id ?? 0,
         sessionYearId: selectedSessionYear.id ?? 0);
   }
 

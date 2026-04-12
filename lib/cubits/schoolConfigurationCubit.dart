@@ -48,13 +48,36 @@ class SchoolConfigurationCubit extends Cubit<SchoolConfigurationState> {
     return SchoolConfiguration.fromJson({});
   }
 
-
-String fetchExamRules() {
+  String fetchExamRules() {
     if (state is SchoolConfigurationFetchSuccess) {
       return getSchoolConfiguration()
               .schoolSettings
               .onlineExamTermsAndCondition ??
           "";
+    }
+    return '';
+  }
+
+  // Get privacy policy content
+  String getPrivacyPolicy() {
+    if (state is SchoolConfigurationFetchSuccess) {
+      return getSchoolConfiguration().schoolSettings.privacyPolicy ?? '';
+    }
+    return '';
+  }
+
+  // Get terms and conditions content
+  String getTermsCondition() {
+    if (state is SchoolConfigurationFetchSuccess) {
+      return getSchoolConfiguration().schoolSettings.termsCondition ?? '';
+    }
+    return '';
+  }
+
+  // Get refund/cancellation policy content
+  String getRefundCancellation() {
+    if (state is SchoolConfigurationFetchSuccess) {
+      return getSchoolConfiguration().schoolSettings.refundCancellation ?? '';
     }
     return '';
   }

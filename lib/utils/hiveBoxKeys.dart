@@ -11,6 +11,7 @@ const String isStudentLogInKey = "isStudentLogIn";
 const String studentDetailsKey = "studentDetails";
 const String studentProfileDataKey = "studentProfileData";
 const String parentDetailsKey = "parentDetails";
+const String fcmTokenKey = "fcmToken";
 
 //Student subject box keys
 
@@ -31,3 +32,11 @@ const String notificationsBoxKey = "notifications";
 
 const String temporarilyStoredNotificationsKey =
     "temporarilyStoredNotifications";
+
+// Pending exam submission box keys
+const String pendingExamBoxKey = "pendingExamBox";
+const String pendingExamIdKey = "pendingExamId";
+const String pendingExamAnswersKey = "pendingExamAnswers";
+const String pendingExamTitleKey = "pendingExamTitle";
+const String pendingExamSubjectNameKey = "pendingExamSubjectName";
+const String pendingExamClassSubjectIdKey = "pendingExamClassSubjectId";

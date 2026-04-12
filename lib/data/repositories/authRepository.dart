@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:eschool/data/models/guardian.dart';
 import 'package:eschool/data/models/student.dart';
 import 'package:eschool/utils/api.dart';
@@ -70,6 +72,14 @@ class AuthRepository {
     return Hive.box(authBoxKey).put(jwtTokenKey, value);
   }
 
+  String getFcmToken() {
+    return Hive.box(authBoxKey).get(fcmTokenKey) ?? "";
+  }
+
+  Future<void> setFcmToken(String value) async {
+    return Hive.box(authBoxKey).put(fcmTokenKey, value);
+  }
+
   String get schoolCode =>
       Hive.box(authBoxKey).get(schoolCodeKey, defaultValue: "") as String;
 
@@ -78,12 +88,26 @@ class AuthRepository {
 
   Future<void> signOutUser() async {
     try {
-      Api.post(body: {}, url: Api.logout, useAuthToken: true);
+      // Get the current FCM token from Hive before clearing
+      final String currentFcmToken = getFcmToken();
+
+      // Send FCM token to backend for clearing
+      final body = {
+        if (currentFcmToken.isNotEmpty) "fcm_id": currentFcmToken,
+      };
+
+      await Api.post(body: body, url: Api.logout, useAuthToken: true);
     } catch (e) {
-      //
+      if (kDebugMode) {
+        debugPrint("Logout API error: $e");
+      }
+      // Continue with local logout even if API fails
     }
+
+    // Clear all local data
     setIsLogIn(false);
     setJwtToken("");
+    setFcmToken(""); // Clear FCM token from Hive
     setStudentDetails(Student.fromJson({}));
     setParentDetails(Guardian.fromJson({}));
     clearStudentProfileData();
@@ -96,12 +120,26 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      final fcmToken = await FirebaseMessaging.instance.getToken();
+      String? fcmToken;
+
+      try {
+        // Request permissions before getting token (required for iOS)
+
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('FCM token retrieval failed: $e');
+        }
+        // Continue with null token if FCM fails
+        fcmToken = null;
+      }
+
       final body = {
         "password": password,
         "school_code": schoolCode,
         "gr_number": grNumber,
-        "fcm_id": fcmToken
+        "fcm_id": fcmToken,
+        "device_type": Platform.isIOS ? "ios" : "android",
       };
 
       final result = await Api.post(
@@ -113,6 +151,11 @@ class AuthRepository {
       final data = result['data'] as Map<String, dynamic>;
       final school = data['school'] as Map<String, dynamic>;
 
+      // Store FCM token in Hive for later use (e.g., during logout)
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await setFcmToken(fcmToken);
+      }
+
       return {
         "jwtToken": result['token'],
         "schoolCode": school['code'],
@@ -120,7 +163,7 @@ class AuthRepository {
       };
     } catch (e) {
       if (kDebugMode) {
-        print(e);
+        debugPrint(e.toString());
       }
 
       throw ApiException(e.toString());
@@ -133,23 +176,43 @@ class AuthRepository {
     required String password,
   }) async {
     try {
-      final fcmToken = await FirebaseMessaging.instance.getToken();
+      String? fcmToken;
+
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('FCM token retrieval failed: $e');
+        }
+        // Continue with null token if FCM fails
+        fcmToken = null;
+      }
 
       final body = {
         "password": password,
         "email": email,
         "school_code": schoolCode,
         "fcm_id": fcmToken,
+        "device_type": Platform.isIOS ? "ios" : "android",
       };
 
       final result =
           await Api.post(body: body, url: Api.parentLogin, useAuthToken: false);
 
+      // Store FCM token in Hive for later use (e.g., during logout)
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await setFcmToken(fcmToken);
+      }
+
       return {
         "jwtToken": result['token'],
         "parent": Guardian.fromJson(Map.from(result['data'] ?? {}))
       };
-    } catch (e) {
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint("this is the stack trace: $st");
+        debugPrint("this is the error: $e");
+      }
       throw ApiException(e.toString());
     }
   }
@@ -200,6 +263,21 @@ class AuthRepository {
       };
       await Api.post(body: body, url: Api.forgotPassword, useAuthToken: false);
     } catch (e) {
+      throw ApiException(e.toString());
+    }
+  }
+
+  Future<Guardian> getParentData() async {
+    try {
+      final result = await Api.get(
+        url: Api.getParentData,
+        useAuthToken: true,
+      );
+
+      return Guardian.fromJson(Map.from(result['data'] ?? {}));
+    } catch (e, st) {
+      print("This is the stack trace: $st");
+      print("This is the error: $e");
       throw ApiException(e.toString());
     }
   }

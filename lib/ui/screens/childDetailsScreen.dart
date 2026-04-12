@@ -78,7 +78,6 @@ class _ChildDetailsScreenState extends State<ChildDetailsScreen> {
         context: context, moduleId: galleryManagementModuleId.toString())) {
       context.read<SchoolGalleryCubit>().fetchSchoolGallery(
           useParentApi: true,
-          childId: widget.student.id,
           sessionYearId: context
                   .read<SchoolConfigurationCubit>()
                   .getSchoolConfiguration()

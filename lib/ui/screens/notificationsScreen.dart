@@ -10,8 +10,6 @@ import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:timeago/timeago.dart' as timeago;
-
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
 
@@ -27,12 +25,35 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 3), () {
+    // Fetch notifications immediately on init
+    Future.delayed(Duration.zero, () {
       context.read<NotificationsCubit>().fetchNotifications();
     });
+
+    // Setup pagination listener
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.maxScrollExtent ==
+        _scrollController.offset) {
+      final notificationsCubit = context.read<NotificationsCubit>();
+      if (notificationsCubit.hasMore()) {
+        notificationsCubit.fetchMoreNotifications();
+      }
+    }
   }
 
   @override
@@ -59,6 +80,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     context.read<NotificationsCubit>().fetchNotifications();
                   },
                   child: ListView.builder(
+                      controller: _scrollController,
                       padding: EdgeInsets.only(
                           bottom: 25,
                           left: MediaQuery.of(context).size.width *
@@ -71,8 +93,59 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               context: context,
                               appBarHeightPercentage:
                                   Utils.appBarSmallerHeightPercentage)),
-                      itemCount: state.notifications.length,
+                      itemCount: state.notifications.length +
+                          (state.fetchMoreNotificationsInProgress || state.moreNotificationsFetchError ? 1 : 0),
                       itemBuilder: (context, index) {
+                        // Show loading indicator or error at the bottom
+                        if (index >= state.notifications.length) {
+                          if (state.fetchMoreNotificationsInProgress) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20),
+                                child: CustomCircularProgressIndicator(
+                                  indicatorColor:
+                                      Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            );
+                          } else if (state.moreNotificationsFetchError) {
+                            return Center(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      Utils.getTranslatedLabel('errorLoadingMoreDataKey'),
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.error,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        context.read<NotificationsCubit>().retryFetchMore();
+                                      },
+                                      icon: Icon(
+                                        Icons.refresh,
+                                        size: 16,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                      label: Text(
+                                        Utils.getTranslatedLabel('retryKey'),
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }
+                        }
+
                         final notification = state.notifications[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 20),
@@ -85,13 +158,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           width: MediaQuery.of(context).size.width * (0.85),
                           child: LayoutBuilder(
                             builder: (context, boxConstraints) {
+                              final hasImage = notification.image != null &&
+                                  notification.image!.isNotEmpty;
+                              final heroTag =
+                                  'notification-image-${notification.id}';
+
                               return Row(
                                 children: [
                                   SizedBox(
                                     width: boxConstraints.maxWidth *
-                                        (notification.attachmentUrl.isEmpty
-                                            ? 1.0
-                                            : 0.725),
+                                        (hasImage ? 0.725 : 1.0),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -104,13 +180,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                                 .colorScheme
                                                 .secondary,
                                             fontSize: 15.0,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                         SizedBox(
                                           height: 5,
                                         ),
                                         Text(
-                                          notification.body,
+                                          notification.message,
                                           style: TextStyle(
                                             height: 1.2,
                                             color: Theme.of(context)
@@ -120,9 +197,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                             fontSize: 11.5,
                                           ),
                                         ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
                                         Text(
-                                          timeago
-                                              .format(notification.createdAt),
+                                          notification.createdAt,
                                           style: TextStyle(
                                             color: Theme.of(context)
                                                 .colorScheme
@@ -136,24 +215,55 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                       ],
                                     ),
                                   ),
-                                  notification.attachmentUrl.isNotEmpty
-                                      ? const Spacer()
-                                      : const SizedBox(),
-                                  notification.attachmentUrl.isNotEmpty
-                                      ? Container(
-                                          width:
-                                              boxConstraints.maxWidth * (0.25),
-                                          height:
-                                              boxConstraints.maxWidth * (0.25),
-                                          decoration: BoxDecoration(
-                                              image: DecorationImage(
-                                                  fit: BoxFit.cover,
-                                                  image:
-                                                      CachedNetworkImageProvider(
-                                                          notification
-                                                              .attachmentUrl)),
-                                              borderRadius:
-                                                  BorderRadius.circular(5)),
+                                  hasImage ? const Spacer() : const SizedBox(),
+                                  hasImage
+                                      ? Material(
+                                          color: Colors.transparent,
+                                          child: InkWell(
+                                            borderRadius:
+                                                BorderRadius.circular(5),
+                                            onTap: () {
+                                              Utils.showImagePreview(
+                                                context: context,
+                                                imageUrl: notification.image!,
+                                                heroTag: heroTag,
+                                              );
+                                            },
+                                            child: SizedBox(
+                                              width: boxConstraints.maxWidth *
+                                                  (0.25),
+                                              height: boxConstraints.maxWidth *
+                                                  (0.25),
+                                              child: Hero(
+                                                tag: heroTag,
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl:
+                                                        notification.image!,
+                                                    fit: BoxFit.cover,
+                                                    placeholder:
+                                                        (context, url) =>
+                                                            Center(
+                                                      child:
+                                                          CustomCircularProgressIndicator(
+                                                        indicatorColor:
+                                                            Theme.of(context)
+                                                                .colorScheme
+                                                                .primary,
+                                                      ),
+                                                    ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            const Icon(
+                                                      Icons.error,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                         )
                                       : const SizedBox()
                                 ],

@@ -399,6 +399,7 @@ const String downloadingResultKey = "downloadingResult";
 const String advanceAmountCanNotBeZeroKey = "advanceAmountCanNotBeZero";
 const String galleryKey = "gallery";
 const String photosKey = "photos";
+const String sessionYearKey = "sessionYear";
 const String fetchingSessionYearsKey = "fetchingSessionYears";
 const String failedToGetSessionYearsKey = "failedToGetSessionYears";
 const String showMoreKey = "showMore";
@@ -584,4 +585,17 @@ const String schoolEmailKey = "schoolEmail";
 const String schoolPhoneKey = "schoolPhone";
 const String requestedOnKey = "requestedOn";
 const String pickupPointKey = "pickupPoint";
+
+// Assignment due date display keys
+const String dayLeftKey = "dayLeft";
+const String daysLeftKey = "daysLeft";
+const String dueTodayKey = "dueToday";
+const String dayOverdueKey = "dayOverdue";
+const String daysOverdueKey = "daysOverdue";
+
+// Offline submission retry keys
+const String noInternetKey = "noInternet";
+const String waitingForConnectionKey = "waitingForConnection";
+
+const String noChildrenFoundKey = "noChildren";
 

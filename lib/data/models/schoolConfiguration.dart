@@ -24,7 +24,8 @@ class SchoolConfiguration {
           .toList(),
       semesterDetails: SemesterDetails.fromJson(json['semester'] ?? {}),
       enabledModules: Map<String, String>.from(json['features'] ?? {}),
-      schoolSettings: SchoolSettings.fromJson(Map.from(json['settings'] ?? {})),
+      schoolSettings: SchoolSettings.fromJson(
+          json['settings'] is Map ? Map.from(json['settings']) : {}),
       sessionYear: SessionYear.fromJson(Map.from(json['session_year'] ?? {})),
     );
   }

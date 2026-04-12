@@ -12,6 +12,7 @@ import 'package:eschool/ui/widgets/customTextFieldContainer.dart';
 import 'package:eschool/ui/widgets/passwordHideShowButton.dart';
 import 'package:eschool/utils/biometric_utils.dart';
 import 'package:eschool/utils/labelKeys.dart';
+import 'package:eschool/utils/unauthenticatedAccessManager.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,6 +41,8 @@ class StudentLoginScreen extends StatefulWidget {
 
   @override
   State<StudentLoginScreen> createState() => _StudentLoginScreenState();
+
+  static Widget routeInstance() => const StudentLoginScreenProvider();
 }
 
 class _StudentLoginScreenState extends State<StudentLoginScreen>
@@ -376,8 +379,27 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                                   student: state.student,
                                 );
 
-                            Get.offNamedUntil(
-                                Routes.home, (Route<dynamic> route) => false);
+                            // Unblock API calls after re-authentication
+                            UnauthenticatedAccessManager()
+                                .onUserAuthenticated();
+
+                            // Check if user was redirected here due to 401
+                            final lastRoute =
+                                UnauthenticatedAccessManager().lastRoute;
+                            if (lastRoute != null &&
+                                lastRoute != Routes.auth &&
+                                lastRoute != Routes.studentLogin &&
+                                lastRoute != Routes.parentLogin) {
+                              UnauthenticatedAccessManager().clearLastRoute();
+                              Get.offNamedUntil(
+                                lastRoute,
+                                (_) => false,
+                              );
+                            } else {
+                              UnauthenticatedAccessManager().clearLastRoute();
+                              Get.offNamedUntil(Routes.studentOnbording,
+                                  (Route<dynamic> route) => false);
+                            }
                           } else if (state is SignInFailure) {
                             Utils.showCustomSnackBar(
                               context: context,
