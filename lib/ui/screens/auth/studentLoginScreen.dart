@@ -10,7 +10,6 @@ import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
 import 'package:eschool/ui/widgets/customRoundedButton.dart';
 import 'package:eschool/ui/widgets/customTextFieldContainer.dart';
 import 'package:eschool/ui/widgets/passwordHideShowButton.dart';
-import 'package:eschool/utils/biometric_utils.dart';
 import 'package:eschool/utils/labelKeys.dart';
 import 'package:eschool/utils/unauthenticatedAccessManager.dart';
 import 'package:eschool/utils/utils.dart';
@@ -19,7 +18,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:local_auth/local_auth.dart';
 
 class StudentLoginScreenProvider extends StatelessWidget {
   const StudentLoginScreenProvider({Key? key}) : super(key: key);
@@ -78,18 +76,10 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
 
   bool _hidePassword = true;
 
-  List<BiometricType> _availableBiometrics = [];
-
   @override
   void initState() {
     super.initState();
     _animationController.forward();
-    _getAvailableBiometrics();
-  }
-
-  Future<void> _getAvailableBiometrics() async {
-    _availableBiometrics = await BiometricUtils.getAvailableBiometrics();
-    setState(() {});
   }
 
   @override
@@ -136,18 +126,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
           schoolCode: _schoolCodeController.text.trim(),
           isStudentLogin: true,
         );
-  }
-
-  Future<void> _signInWithBiometrics() async {
-    final bool canCheckBiometrics = await BiometricUtils.canCheckBiometrics();
-    if (canCheckBiometrics) {
-      final bool authenticated = await BiometricUtils.authenticate();
-      if (authenticated) {
-        context
-            .read<BioAuthCubit>()
-            .authenticateWithBiometrics(isStudent: true);
-      }
-    }
   }
 
   Widget _buildRequestResetPasswordContainer() {
@@ -213,45 +191,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
           child: SvgPicture.asset(
             Utils.getImagePath("lower_pattern.svg"),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBiometricButton() {
-    if (_availableBiometrics.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final biometricType = _availableBiometrics.contains(BiometricType.face)
-        ? BiometricType.face
-        : _availableBiometrics.first;
-
-    final isFace = biometricType == BiometricType.face;
-
-    return SizedBox(
-      width: 50.0,
-      height: 50.0,
-      child: GestureDetector(
-        onTap: _signInWithBiometrics,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          child: isFace
-              ? SvgPicture.asset(
-                  "assets/images/faceID.svg",
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).scaffoldBackgroundColor,
-                    BlendMode.srcIn,
-                  ),
-                )
-              : Icon(
-                  Icons.fingerprint,
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                ),
         ),
       ),
     );

@@ -599,3 +599,4 @@ const String waitingForConnectionKey = "waitingForConnection";
 
 const String noChildrenFoundKey = "noChildren";
 
+const String yourTransportationRequestWasRejectedKey = "yourTransportationRequestWasRejected";const String yourRequestIsBeingProcessedKey = "yourRequestIsBeingProcessed";
