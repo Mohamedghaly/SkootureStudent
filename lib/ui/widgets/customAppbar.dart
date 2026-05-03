@@ -85,10 +85,10 @@ class CustomAppBar extends StatelessWidget {
                 ),
               ),
               Align(
-                alignment: Alignment.centerRight,
+                alignment: AlignmentDirectional.centerEnd,
                 child: Padding(
-                  padding: EdgeInsets.only(
-                    right: Utils.screenContentTopPadding,
+                  padding: EdgeInsetsDirectional.only(
+                    end: Utils.screenContentHorizontalPadding,
                   ),
                   child: trailingWidget ?? const SizedBox(),
                 ),
