@@ -444,5 +444,15 @@
   "unauthorizedPerson": "Personne non autorisée",
   "missedPickup": "Ramassage manqué",
   "uncleanBusInterior": "Intérieur du bus malpropre",
-  "busBreakdown": "Panne de bus"
+  "busBreakdown": "Panne de bus",
+  "allCategories": "Toutes les catégories",
+  "noDiaryEntriesFound": "Aucune entrée de journal trouvée",
+  "positiveEntries": "Entrées positives",
+  "negativeEntries": "Entrées négatives",
+  "studentDiary": "Journal de l'élève",
+  "myDiary": "Mon journal",
+  "newestFirst": "Le plus récent en premier",
+  "oldestFirst": "Le plus ancien en premier",
+  "negativeNotes": "Notes négatives",
+  "positiveNotes": "Notes positives"
 }
