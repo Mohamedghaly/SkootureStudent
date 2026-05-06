@@ -34,9 +34,10 @@ def keystoreProperties = new Properties()
    }
 
 android {
-        compileSdkVersion 36
-    compileOptions {
-        coreLibraryDesugaringEnabled true  
+    namespace 'com.skooture.app'
+    compileSdkVersion 36
+    ndkVersion = "28.2.13676358"
+    compileOptions {        coreLibraryDesugaringEnabled true  
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }

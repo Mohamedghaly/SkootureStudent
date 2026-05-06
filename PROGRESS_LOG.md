@@ -1,3 +1,19 @@
+# SkootureStudent Project Update Log - May 6, 2026
+
+## Overview
+This log documents the successful resolution of Android build issues and the generation of the release APK for the `SkootureStudent` project.
+
+## Key Accomplishments
+
+### 1. Android Build & Compatibility Fixes
+*   **Kotlin Gradle Plugin Upgrade**: Successfully updated the `org.jetbrains.kotlin.android` plugin from `1.9.24` to `2.3.10` in `settings.gradle`. This was required to satisfy the version requirements of modern dependencies, particularly the Stripe Android SDK.
+*   **Android NDK Upgrade**: Updated the `ndkVersion` in `android/app/build.gradle` to `28.2.13676358` as recommended by the Android build tools to ensure backward compatibility across all plugins.
+*   **Release APK Generation**: Successfully generated the release APK (`app-release.apk`) after resolving all Kotlin compilation and dependency metadata version mismatches.
+
+## Current Status
+*   **Android Build**: The project builds successfully in release mode (`flutter build apk --release`).
+*   **Artifacts**: The release APK is available at `build/app/outputs/flutter-apk/app-release.apk`.
+
 # SkootureStudent Project Update Log - April 12, 2026
 
 ## Overview
