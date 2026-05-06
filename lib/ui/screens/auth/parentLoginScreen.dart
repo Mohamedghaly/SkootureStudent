@@ -302,7 +302,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                         height: 10.0,
                       ),
                       Text(
-                        "${Utils.getTranslatedLabel(welcomeBackKey)}, \n${Utils.getTranslatedLabel(youHaveBeenMissedKey)}",
+                        "${Utils.getTranslatedLabel(welcomeBackKey)}, ${Utils.getTranslatedLabel(youHaveBeenMissedKey)}",
                         style: TextStyle(
                           fontSize: 24.0,
                           height: 1.5,

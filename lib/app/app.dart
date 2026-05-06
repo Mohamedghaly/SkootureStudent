@@ -68,6 +68,7 @@ class MyHttpOverrides extends HttpOverrides {
 Future<void> initializeApp() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
+  GoogleFonts.config.allowRuntimeFetching = false;
   //Register the licence of font
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
@@ -202,7 +203,7 @@ class _MyAppState extends State<MyApp> {
             debugShowCheckedModeBanner: false,
             theme: Theme.of(context).copyWith(
               textTheme:
-                  GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+                  GoogleFonts.cairoTextTheme(Theme.of(context).textTheme),
               scaffoldBackgroundColor: pageBackgroundColor,
               colorScheme: Theme.of(context).colorScheme.copyWith(
                     primary: primaryColor,

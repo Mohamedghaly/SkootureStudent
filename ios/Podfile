@@ -39,34 +39,36 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
 
     target.build_configurations.each do |config|
-      xcconfig_path = config.base_configuration_reference.real_path
-      xcconfig = File.read(xcconfig_path)
-      xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
-      File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
-
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-        'PERMISSION_NOTIFICATIONS=1', # Define flag for notifications
-      ]
+      # Fix for "Using bridging headers with module interfaces is unsupported"
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'NO'
-    end
-  end
-
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-    target.build_configurations.each do |config|
+      
+      # Ensure consistent deployment target and swift version
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
       config.build_settings['SWIFT_VERSION'] = '5.0'
+
+      # Fix for TOOLCHAIN_DIR in Xcode 15+ and BUILD_LIBRARY_FOR_DISTRIBUTION
+      if config.base_configuration_reference
+        xcconfig_path = config.base_configuration_reference.real_path
+        if File.exist?(xcconfig_path)
+          xcconfig = File.read(xcconfig_path)
+          xcconfig_mod = xcconfig.gsub(/DT_TOOLCHAIN_DIR/, "TOOLCHAIN_DIR")
+          xcconfig_mod = xcconfig_mod.gsub(/BUILD_LIBRARY_FOR_DISTRIBUTION = YES/, "BUILD_LIBRARY_FOR_DISTRIBUTION = NO")
+          File.open(xcconfig_path, "w") { |file| file << xcconfig_mod }
+        end
+      end
+
+      # Add definitions if needed
+      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
+        '$(inherited)',
+        'PERMISSION_NOTIFICATIONS=1',
+      ]
     end
   end
 
   # Patch ScreenProtectorKit for Swift 6 compatibility
   path = File.join(installer.sandbox.root, 'ScreenProtectorKit/Sources/ScreenProtectorKit/ScreenProtectorKit.swift')
   if File.exist?(path)
-    # Ensure file is writable
     File.chmod(0644, path)
-    
-    # Overwrite with a version that safely handles the missing ScreenPreventer features
     File.open(path, 'w') { |file| file << <<-EOF
 import UIKit
 import ScreenPreventerKit
@@ -175,6 +177,7 @@ EOF
     }
   end
 end
+
 
 # Commented out post_integrate hook that can cause PhaseScriptExecution errors in Xcode 16.2
 # If you need this for specific compatibility, uncomment and debug individually
