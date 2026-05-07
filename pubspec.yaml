@@ -99,7 +99,7 @@ dependency_overrides:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/appLogo.png"
+  image_path: "AI/Icon-App-83.5x83.5@2x.png"
   remove_alpha_ios: true
 
 flutter_launcher_name:
