@@ -1,4 +1,4 @@
-package com.skooture.app
+package com.skooture.student
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

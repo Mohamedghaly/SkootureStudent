@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCpb7FV7ftE4RUASyGgoQVoi4I_AAcntcc',
-    appId: '1:539033120705:android:10f3b01274c5d641d8c940',
-    messagingSenderId: '539033120705',
-    projectId: 'e-school-saas',
-    storageBucket: 'e-school-saas.appspot.com',
+    apiKey: 'AIzaSyA0J4oYGBzknYJosj1_XoOPluY_UbuhsfA',
+    appId: '1:243969034005:android:23cdf25dbba981d1decb1c',
+    messagingSenderId: '243969034005',
+    projectId: 'skooture-student',
+    storageBucket: 'skooture-student.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
