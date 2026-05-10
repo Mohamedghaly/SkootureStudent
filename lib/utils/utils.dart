@@ -592,12 +592,8 @@ class Utils {
       }
       return permissionGiven;
     } else {
-      bool permissionGiven = await Permission.photos.isGranted;
-      if (!permissionGiven) {
-        permissionGiven = (await Permission.photos.request()).isGranted;
-        return permissionGiven;
-      }
-      return permissionGiven;
+      // For Android 13+ (SDK 33+), we use the Photo Picker which doesn't require these permissions
+      return true;
     }
   }
 
@@ -611,6 +607,14 @@ class Utils {
   }
 
   static Future<bool> hasGalleryPermissionGiven() async {
+    if (Platform.isAndroid) {
+      final deviceInfoPlugin = DeviceInfoPlugin();
+      final androidDeviceInfo = await deviceInfoPlugin.androidInfo;
+      if (androidDeviceInfo.version.sdkInt >= 33) {
+        // For Android 13+ (SDK 33+), we use the Photo Picker which doesn't require these permissions
+        return true;
+      }
+    }
     bool permissionGiven = await Permission.photos.isGranted;
     if (!permissionGiven) {
       permissionGiven = (await Permission.photos.request()).isGranted;

@@ -1,3 +1,15 @@
+# Session Progress - May 10, 2026
+
+## Summary of Completed Tasks
+
+### 1. Fix Google Play Store Rejection (Media Permissions)
+- **Objective:** Remove broad media permissions and implement compliant media selection.
+- **Problem:** Google rejected the app due to invalid use of `READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO` permissions.
+- **Changes:**
+  - Updated `android/app/src/main/AndroidManifest.xml`: Removed broad permissions and implemented `tools:node="remove"` for `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `READ_EXTERNAL_STORAGE`, and `WRITE_EXTERNAL_STORAGE`.
+  - Updated `lib/utils/utils.dart`: Modified `hasStoragePermissionGiven` and `hasGalleryPermissionGiven` to return `true` on Android 13+ (SDK 33+), bypassing unnecessary permission requests and allowing the system Photo Picker to handle media selection.
+- **Result:** The final merged manifest is verified to be clean of broad media permissions, ensuring compliance with Google Play Store policies.
+
 # Session Progress - May 9, 2026
 
 ## Summary of Completed Tasks

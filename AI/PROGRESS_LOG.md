@@ -1,3 +1,25 @@
+# SkootureStudent Project Update Log - May 10, 2026
+
+## Overview
+This log documents the resolution of the Google Play Store rejection regarding invalid use of broad media permissions (`READ_MEDIA_IMAGES` and `READ_MEDIA_VIDEO`).
+
+## Key Accomplishments
+
+### 1. Media Permission Compliance
+*   **Manifest Cleanup**: Removed `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE`, and `READ_MEDIA_IMAGES` from `android/app/src/main/AndroidManifest.xml`. 
+*   **Permission Stripping**: Implemented `tools:node="remove"` for `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `READ_EXTERNAL_STORAGE`, and `WRITE_EXTERNAL_STORAGE`. This explicitly strips these permissions from the final merged manifest, even if they are injected by third-party dependencies (e.g., `open_filex`), ensuring 100% compliance with Google Play Store policies.
+*   **Scoped Media Access**: Transitioned the app to rely on the Android Photo Picker and System File Picker for occasional media selection (assignments, chat attachments), which is compliant with Google's latest privacy policies.
+*   **Code Update**: Modified `lib/utils/utils.dart` to bypass manual permission requests for storage and gallery on Android 13+ (SDK 33+). The app now correctly handles these requests by allowing the system pickers to manage access, improving user privacy and satisfying store requirements.
+
+### 2. Production Build Generation (In Progress)
+*   **AAB Regeneration**: Initiated the process to generate a new production Android App Bundle (`app-release.aab`) incorporating the permission fixes.
+
+## Current Status
+*   **Compliance**: The app now follows Google's "Best practices for media permissions" by using scoped access.
+*   **Codebase**: Updated `AndroidManifest.xml` and `utils.dart` have been verified.
+
+---
+
 # SkootureStudent Project Update Log - May 9, 2026
 
 ## Overview
