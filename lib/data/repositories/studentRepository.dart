@@ -10,6 +10,7 @@ import 'package:eschool/data/models/exam.dart';
 import 'package:eschool/data/models/result.dart';
 import 'package:eschool/data/models/student.dart';
 import 'package:eschool/data/models/timeTableSlot.dart';
+import 'package:eschool/data/repositories/authRepository.dart';
 import 'package:eschool/utils/stripeService.dart';
 import 'package:eschool/utils/api.dart';
 import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
@@ -334,10 +335,19 @@ class StudentRepository {
 
   Future<Uint8List> downloadIdCard({int? userId}) async {
     try {
+      final effectiveUserId = userId ??
+          AuthRepository.getStudentDetails().userId ??
+          AuthRepository.getStudentDetails().id;
+
       final result = await Api.get(
         url: Api.downloadStudentIdCard,
         useAuthToken: true,
-        queryParameters: userId != null ? {"user_id": userId} : null,
+        queryParameters: effectiveUserId != null
+            ? {
+                "user_id": effectiveUserId,
+                "student_id": effectiveUserId,
+              }
+            : null,
       );
 
       if (result['pdf'] == null) {

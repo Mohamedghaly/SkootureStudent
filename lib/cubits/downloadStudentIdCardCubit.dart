@@ -1,8 +1,7 @@
 import 'dart:io';
 
+import 'package:eschool/data/repositories/authRepository.dart';
 import 'package:eschool/data/repositories/studentRepository.dart';
-
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -34,21 +33,26 @@ class DownloadStudentIdCardCubit extends Cubit<DownloadStudentIdCardState> {
     try {
       emit(DownloadStudentIdCardInProgress());
 
+      final effectiveUserId = userId ??
+          AuthRepository.getStudentDetails().userId ??
+          AuthRepository.getStudentDetails().id;
+
       final path = (await getApplicationDocumentsDirectory()).path;
-      final String fileName =
-          userId != null ? "id-card-$userId.pdf" : "id-card.pdf";
+      final String fileName = effectiveUserId != null
+          ? "id-card-$effectiveUserId.pdf"
+          : "id-card.pdf";
       final String filePath = "$path/IdCards/$fileName";
 
       final File file = File(filePath);
 
-      final pdfBytes = await _studentRepository.downloadIdCard(userId: userId);
+      final pdfBytes =
+          await _studentRepository.downloadIdCard(userId: effectiveUserId);
       await file.create(recursive: true);
 
       await file.writeAsBytes(pdfBytes);
       emit(DownloadStudentIdCardSuccess(downloadedFilePath: filePath));
     } catch (e) {
-      emit(DownloadStudentIdCardFailure(
-          e.toString()));
+      emit(DownloadStudentIdCardFailure(e.toString()));
     }
   }
 }

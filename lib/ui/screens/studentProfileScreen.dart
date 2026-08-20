@@ -373,7 +373,9 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
               _buildIdCardButton(
                   userId: widget.userId ??
                       studentDetails.userId ??
-                      studentDetails.childUserDetails?.id),
+                      studentDetails.childUserDetails?.id ??
+                      studentDetails.id ??
+                      widget.childId),
             const SizedBox(
               height: 10.0,
             ),
