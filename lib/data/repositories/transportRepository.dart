@@ -49,6 +49,16 @@ class TransportRepository {
     }
   }
 
+  Map<String, dynamic> _extractDataMap(dynamic data) {
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    if (data is List && data.isNotEmpty && data.first is Map) {
+      return Map<String, dynamic>.from(data.first);
+    }
+    return <String, dynamic>{};
+  }
+
   Future<TransportDashboard> getDashboard({
     required int userId,
   }) async {
@@ -58,10 +68,9 @@ class TransportRepository {
         useAuthToken: true,
         body: {
           'user_id': userId.toString(),
-         
         },
       );
-      return TransportDashboard.fromJson(Map.from(result['data'] ?? {}));
+      return TransportDashboard.fromJson(_extractDataMap(result['data']));
     } catch (e, st) {
       debugPrint("this is the error: $e");
       debugPrint("this is the stack trace: $st");
@@ -80,7 +89,7 @@ class TransportRepository {
           'user_id': userId.toString(),
         },
       );
-      return VehicleAssignmentStatus.fromJson(Map.from(result));
+      return VehicleAssignmentStatus.fromJson(_extractDataMap(result));
     } catch (e) {
       throw ApiException(e.toString());
     }
@@ -97,7 +106,7 @@ class TransportRepository {
           'user_id': userId.toString(),
         },
       );
-      return TransportPlanDetails.fromJson(Map.from(result['data'] ?? {}));
+      return TransportPlanDetails.fromJson(_extractDataMap(result['data']));
     } catch (e, st) {
       debugPrint("this is the error: $e");
       debugPrint("this is the stack trace: $st");
@@ -116,7 +125,7 @@ class TransportRepository {
           'user_id': userId.toString(),
         },
       );
-      return BusRouteStops.fromJson(Map.from(result['data'] ?? {}));
+      return BusRouteStops.fromJson(_extractDataMap(result['data']));
     } catch (e) {
       throw ApiException(e.toString());
     }
@@ -137,7 +146,7 @@ class TransportRepository {
           'trip_type': tripType,
         },
       );
-      return TransportAttendanceResponse.fromJson(Map.from(result));
+      return TransportAttendanceResponse.fromJson(_extractDataMap(result));
     } catch (e) {
       throw Exception('Failed to get transport attendance: ${e.toString()}');
     }
@@ -154,7 +163,7 @@ class TransportRepository {
           'user_id': userId.toString(),
         },
       );
-      return TransportRequestsResponse.fromJson(Map.from(result));
+      return TransportRequestsResponse.fromJson(_extractDataMap(result));
     } catch (e) {
       throw Exception('Failed to get transport requests: ${e.toString()}');
     }

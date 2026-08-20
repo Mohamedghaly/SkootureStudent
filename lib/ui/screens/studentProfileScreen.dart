@@ -35,12 +35,22 @@ class StudentProfileScreen extends StatefulWidget {
   State<StudentProfileScreen> createState() => _StudentProfileScreenState();
 
   static Widget routeInstance() {
-    final arguments = Get.arguments as Map<String, dynamic>?;
+    int? childId;
+    int? userId;
+    final arguments = Get.arguments;
+
+    if (arguments is int) {
+      childId = arguments;
+    } else if (arguments is Map) {
+      childId = arguments['childId'] as int?;
+      userId = arguments['userId'] as int?;
+    }
+
     return BlocProvider(
       create: (context) => StudentAllProfileDetailsCubit(StudentRepository()),
       child: StudentProfileScreen(
-        childId: arguments?['childId'] as int?,
-        userId: arguments?['userId'] as int?,
+        childId: childId,
+        userId: userId,
       ),
     );
   }

@@ -27,7 +27,11 @@ This log documents the successful merge of core updates and features from `e-sch
     *   Updated `StudentProfileScreen` to invoke `OpenFilex.open()`.
     *   Rebuilt CocoaPods with `pod install` in `ios/`.
     *   Maintained `path_provider_foundation: 2.4.1` dependency override.
-    *   Verified 0 static analysis errors (`flutter analyze lib` passed cleanly).
+
+### 5. Runtime Fixes & Stability
+*   **Student Profile Route Argument Parsing**: Fixed `type 'int' is not a subtype of type 'Map<String, dynamic>?'` exception when navigating from parent child view to student profile by updating `StudentProfileScreen.routeInstance()` to handle both `int` and `Map<String, dynamic>` arguments.
+*   **Transport Plan Deserialization**: Fixed `type 'List<dynamic>' is not a subtype of type 'Map<dynamic, dynamic>'` in `TransportRepository.getCurrentTransportPlan` by implementing defensive `_extractDataMap` parser when backend returns empty lists.
+*   **Teachers Endpoint Alignment**: Updated `ParentRepository.fetchChildTeachers` to pass `student_id` and `child_id` query parameters matching the backend API requirement.
 
 ## Current Status
 *   **Branch**: `feature/mergeNewUpdates`

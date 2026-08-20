@@ -60,7 +60,10 @@ class ParentRepository {
       final result = await Api.get(
         url: Api.getStudentTeachersParent,
         useAuthToken: true,
-        queryParameters: {"child_id": childId},
+        queryParameters: {
+          "student_id": childId,
+          "child_id": childId,
+        },
       );
 
       if (kDebugMode) {
