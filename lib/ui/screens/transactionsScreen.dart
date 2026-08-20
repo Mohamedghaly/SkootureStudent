@@ -107,7 +107,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                                 ? const SizedBox()
                                 : Text(
                                     Utils.formatDate(
-                                        DateTime.parse(transaction.createdAt!)
+                                        Utils.parseTransactionDate(transaction.createdAt ?? DateTime.now().toIso8601String())
                                             .toLocal()),
                                     style: TextStyle(
                                         fontSize: 12.0,
@@ -120,7 +120,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                               width: 5.0,
                             ),
                             Text(
-                              TimeOfDay.fromDateTime(DateTime.parse(
+                              TimeOfDay.fromDateTime(Utils.parseTransactionDate(
                                           transaction.createdAt ??
                                               DateTime.now().toIso8601String())
                                       .toLocal())

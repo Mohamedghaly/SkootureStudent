@@ -10,15 +10,14 @@ import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
 import 'package:eschool/ui/widgets/customRoundedButton.dart';
 import 'package:eschool/ui/widgets/customTextFieldContainer.dart';
 import 'package:eschool/ui/widgets/passwordHideShowButton.dart';
-import 'package:eschool/utils/biometric_utils.dart';
 import 'package:eschool/utils/labelKeys.dart';
+import 'package:eschool/utils/unauthenticatedAccessManager.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:local_auth/local_auth.dart';
 
 class StudentLoginScreenProvider extends StatelessWidget {
   const StudentLoginScreenProvider({Key? key}) : super(key: key);
@@ -40,6 +39,8 @@ class StudentLoginScreen extends StatefulWidget {
 
   @override
   State<StudentLoginScreen> createState() => _StudentLoginScreenState();
+
+  static Widget routeInstance() => const StudentLoginScreenProvider();
 }
 
 class _StudentLoginScreenState extends State<StudentLoginScreen>
@@ -75,18 +76,10 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
 
   bool _hidePassword = true;
 
-  List<BiometricType> _availableBiometrics = [];
-
   @override
   void initState() {
     super.initState();
     _animationController.forward();
-    _getAvailableBiometrics();
-  }
-
-  Future<void> _getAvailableBiometrics() async {
-    _availableBiometrics = await BiometricUtils.getAvailableBiometrics();
-    setState(() {});
   }
 
   @override
@@ -133,18 +126,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
           schoolCode: _schoolCodeController.text.trim(),
           isStudentLogin: true,
         );
-  }
-
-  Future<void> _signInWithBiometrics() async {
-    final bool canCheckBiometrics = await BiometricUtils.canCheckBiometrics();
-    if (canCheckBiometrics) {
-      final bool authenticated = await BiometricUtils.authenticate();
-      if (authenticated) {
-        context
-            .read<BioAuthCubit>()
-            .authenticateWithBiometrics(isStudent: true);
-      }
-    }
   }
 
   Widget _buildRequestResetPasswordContainer() {
@@ -215,45 +196,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
     );
   }
 
-  Widget _buildBiometricButton() {
-    if (_availableBiometrics.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final biometricType = _availableBiometrics.contains(BiometricType.face)
-        ? BiometricType.face
-        : _availableBiometrics.first;
-
-    final isFace = biometricType == BiometricType.face;
-
-    return SizedBox(
-      width: 50.0,
-      height: 50.0,
-      child: GestureDetector(
-        onTap: _signInWithBiometrics,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          child: isFace
-              ? SvgPicture.asset(
-                  "assets/images/faceID.svg",
-                  colorFilter: ColorFilter.mode(
-                    Theme.of(context).scaffoldBackgroundColor,
-                    BlendMode.srcIn,
-                  ),
-                )
-              : Icon(
-                  Icons.fingerprint,
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildLoginForm() {
     return Align(
       alignment: Alignment.topCenter,
@@ -283,7 +225,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                   children: [
                     Image(
                       image: AssetImage("assets/images/skootureLogo.png"),
-                      height: MediaQuery.of(context).size.width * 0.4,
+                      width: MediaQuery.of(context).size.width * 0.4,
                     ),
                     const SizedBox(
                       height: 5.0,
@@ -376,8 +318,27 @@ class _StudentLoginScreenState extends State<StudentLoginScreen>
                                   student: state.student,
                                 );
 
-                            Get.offNamedUntil(
-                                Routes.home, (Route<dynamic> route) => false);
+                            // Unblock API calls after re-authentication
+                            UnauthenticatedAccessManager()
+                                .onUserAuthenticated();
+
+                            // Check if user was redirected here due to 401
+                            final lastRoute =
+                                UnauthenticatedAccessManager().lastRoute;
+                            if (lastRoute != null &&
+                                lastRoute != Routes.auth &&
+                                lastRoute != Routes.studentLogin &&
+                                lastRoute != Routes.parentLogin) {
+                              UnauthenticatedAccessManager().clearLastRoute();
+                              Get.offNamedUntil(
+                                lastRoute,
+                                (_) => false,
+                              );
+                            } else {
+                              UnauthenticatedAccessManager().clearLastRoute();
+                              Get.offNamedUntil(
+                                  Routes.home, (Route<dynamic> route) => false);
+                            }
                           } else if (state is SignInFailure) {
                             Utils.showCustomSnackBar(
                               context: context,

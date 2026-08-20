@@ -26,9 +26,19 @@ import 'package:eschool/ui/screens/galleryDetailsScreen.dart';
 import 'package:eschool/ui/screens/galleryImagesScreen.dart';
 import 'package:eschool/ui/screens/holidaysScreen.dart';
 import 'package:eschool/ui/screens/home/homeScreen.dart';
+import 'package:eschool/ui/screens/manageDiary/studentDiaryScreen.dart';
 import 'package:eschool/ui/screens/noticeBoardScreen.dart';
 import 'package:eschool/ui/screens/notificationsScreen.dart';
 import 'package:eschool/ui/screens/parentOnbordingScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/selectTransport/staffTransportEnrollScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/selectTransport/widgets/requestSubmittedScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/trasportAttendanceScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/busRouteScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/changeRouteScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/planRenewalScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/transportHomeScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/transportPlanDetailsScreen.dart';
+import 'package:eschool/ui/screens/parentTransportEnroll/transportHome/transportRequestDetailsScreen.dart';
 import 'package:eschool/ui/screens/studentOnbordingScreen.dart';
 import 'package:eschool/ui/screens/parentHomeScreen.dart';
 import 'package:eschool/ui/screens/parentProfileScreen.dart';
@@ -47,6 +57,8 @@ import 'package:eschool/ui/screens/subjectDetails/subjectDetailsScreen.dart';
 import 'package:eschool/ui/screens/termsAndConditionScreen.dart';
 import 'package:eschool/ui/screens/topicDetailsScreen.dart';
 import 'package:eschool/ui/screens/transactionsScreen.dart';
+import 'package:eschool/ui/screens/transportationPayment/transportationPaymentScreen.dart';
+import 'package:eschool/ui/screens/fileViewerScreen.dart';
 import 'package:eschool/utils/paymentWebview.dart';
 import 'package:get/route_manager.dart';
 
@@ -100,6 +112,9 @@ class Routes {
   static const String childResults = "/childResults";
 
   static const String childTeachers = "/childTeachers";
+  static const String childTransportation = "/childTransportation";
+  static const String transportSuccess = "/transportSuccess";
+  static const String liveBusTracking = "/liveBusTracking";
   static const String childFees = "/childFees";
   static const String settings = "/settings";
   static const String parentProfile = "/parentProfile";
@@ -120,6 +135,19 @@ class Routes {
   static const String newChatContacts = "/newChatContacts";
   static const String chat = "/chat";
   static const String paymentWebview = '/payment-webview';
+  static const String transportationPayment = "/transportationPayment";
+  static String studentDiaryScreen = "/studentDiary";
+
+  static String staffTransportEnrollScreen = "/staffTransportEnroll";
+  static String transportEnrollSubmittedScreen = "/transportEnrollSubmitted";
+  static String transportEnrollHomeScreen = "/transportEnrollHome";
+  static String transportPlanDetailsScreen = "/transportPlanDetails";
+  static String busRouteScreen = "/busRoute";
+  static String changeRouteScreen = "/changeRoute";
+  static String transportAttendanceScreen = "/transportAttendance";
+  static String transportRequestDetailsScreen = "/transportRequestDetails";
+  static String planRenewalScreen = "/planRenewal";
+  static String fileViewer = "/fileViewer";
 
   static List<GetPage> getPages = [
     GetPage(name: splash, page: () => SplashScreen.routeInstance()),
@@ -131,8 +159,8 @@ class Routes {
         page: () => ParentOnbordingScreen.routeInstance()),
     GetPage(name: home, page: () => HomeScreen.routeInstance()),
     GetPage(name: auth, page: () => AuthScreen.routeInstance()),
-    GetPage(name: studentLogin, page: () => const StudentLoginScreenProvider()),
-    GetPage(name: parentLogin, page: () => const ParentLoginScreenProvider()),
+    GetPage(name: studentLogin, page: () => StudentLoginScreen.routeInstance()),
+    GetPage(name: parentLogin, page: () => ParentLoginScreen.routeInstance()),
     GetPage(name: parentHome, page: () => ParentHomeScreen.routeInstance()),
     GetPage(
         name: studentProfile, page: () => StudentProfileScreen.routeInstance()),
@@ -210,6 +238,65 @@ class Routes {
     GetPage(
       name: Routes.paymentWebview,
       page: () => const PaymentWebView(),
+    ),
+    GetPage(
+      name: transportationPayment,
+      page: () => TransportationPaymentScreen.routeInstance(),
+    ),
+    GetPage(
+        name: studentDiaryScreen,
+        page: () {
+          final arguments = Get.arguments as Map<String, dynamic>?;
+          final studentId = arguments?['studentId'] as int? ?? 0;
+          final id = arguments?['id'] as int? ?? 0;
+          return StudentDiaryScreen.getRouteInstance(
+            id: id,
+            studentId: studentId,
+           
+          );
+        }),
+
+    // Staff transport enrollment
+    GetPage(
+      name: staffTransportEnrollScreen,
+      page: () => StaffTransportEnrollScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: transportEnrollSubmittedScreen,
+      page: () => TransportEnrollSubmittedScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: transportEnrollHomeScreen,
+      page: () => TransportHomeScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: transportPlanDetailsScreen,
+      page: () => TransportPlanDetailsScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: busRouteScreen,
+      page: () => BusRouteScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: changeRouteScreen,
+      page: () => ChangeRouteScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: transportAttendanceScreen,
+      page: () => TransportAttendanceScreen.getRouteInstance(),
+    ),
+    GetPage(
+      name: transportRequestDetailsScreen,
+      page: () => TransportRequestDetailsScreen.getRouteInstance(
+        args: Get.arguments,
+      ),
+    ),
+    GetPage(
+        name: planRenewalScreen,
+        page: () => PlanRenewalScreen.getRouteInstance()),
+    GetPage(
+      name: fileViewer,
+      page: () => FileViewerScreen.routeInstance(),
     ),
   ];
 }

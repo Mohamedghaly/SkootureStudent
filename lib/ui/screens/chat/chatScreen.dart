@@ -844,6 +844,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
           }
         }
+        // Silently sync missed messages after reconnection (no loading spinner)
+        if (state is SocketReconnected) {
+          context.read<ChatMessagesCubit>().syncMissedMessages(
+                receiverId: widget.receiverId,
+              );
+        }
       },
       child: Scaffold(
         body: Stack(
@@ -855,13 +861,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   if (state.status == SendMessageStatus.success) {
                     final message = state.message!;
 
-                    /// Update the message locally in the cubit and send it to the socket.
+                    /// Update the message locally in the cubit.
+                    /// (Reverb handles broadcasting to the receiver automatically via the backend)
                     context.read<ChatMessagesCubit>().messageSent(message);
-                    context.read<SocketSettingCubit>().sendMessage(
-                          userId: message.senderId,
-                          receiverId: widget.receiverId,
-                          message: message,
-                        );
 
                     ///Clear the message field and attachments once they're sent
                     _messageController.clear();
@@ -872,6 +874,21 @@ class _ChatScreenState extends State<ChatScreen> {
                       lastMessageTime =
                           Utils.parseApiDateWithFormat(message.updatedAt) ??
                               DateTime.now();
+                    });
+                  } else if (state.status == SendMessageStatus.failure) {
+                    // Dismiss keyboard first to ensure snackbar is visible
+                    FocusScope.of(context).unfocus();
+
+                    // Show error message with a small delay to ensure keyboard is dismissed
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      if (context.mounted) {
+                        Utils.showCustomSnackBar(
+                          delayDuration: const Duration(seconds: 4),
+                          context: context,
+                          errorMessage: Utils.getTranslatedLabel("noInternet"),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        );
+                      }
                     });
                   }
                 },

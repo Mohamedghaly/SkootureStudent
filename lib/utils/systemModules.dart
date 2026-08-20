@@ -24,3 +24,4 @@ const int galleryManagementModuleId = 17;
 const int chatModuleId = 20;
 const int defaultModuleId = -1;
 const String moduleIdJoiner = "#";
+const int transportationManagementModuleId = 21;

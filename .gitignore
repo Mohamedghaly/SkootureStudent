@@ -48,4 +48,4 @@ pubspec.lock
 pubspec.lock
 
 # FVM Version Cache
-.fvm/
+.fvm/ios/build/

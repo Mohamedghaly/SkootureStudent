@@ -12,6 +12,7 @@ import 'package:eschool/ui/widgets/customTextFieldContainer.dart';
 import 'package:eschool/ui/widgets/passwordHideShowButton.dart';
 import 'package:eschool/utils/biometric_utils.dart';
 import 'package:eschool/utils/labelKeys.dart';
+import 'package:eschool/utils/unauthenticatedAccessManager.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,12 +41,7 @@ class ParentLoginScreen extends StatefulWidget {
   @override
   State<ParentLoginScreen> createState() => _ParentLoginScreenState();
 
-  static Widget routeInstance() {
-    return BlocProvider<SignInCubit>(
-      child: const ParentLoginScreen(),
-      create: (_) => SignInCubit(AuthRepository()),
-    );
-  }
+  static Widget routeInstance() => const ParentLoginScreenProvider();
 }
 
 class _ParentLoginScreenState extends State<ParentLoginScreen>
@@ -306,7 +302,7 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                         height: 10.0,
                       ),
                       Text(
-                        "${Utils.getTranslatedLabel(welcomeBackKey)}, \n${Utils.getTranslatedLabel(youHaveBeenMissedKey)}",
+                        "${Utils.getTranslatedLabel(welcomeBackKey)}, ${Utils.getTranslatedLabel(youHaveBeenMissedKey)}",
                         style: TextStyle(
                           fontSize: 24.0,
                           height: 1.5,
@@ -390,8 +386,27 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
                                     student: state.student,
                                   );
 
-                              Get.offNamedUntil(Routes.parentHome,
-                                  (Route<dynamic> route) => false);
+                              // Unblock API calls after re-authentication
+                              UnauthenticatedAccessManager()
+                                  .onUserAuthenticated();
+
+                              // Check if user was redirected here due to 401
+                              final lastRoute =
+                                  UnauthenticatedAccessManager().lastRoute;
+                              if (lastRoute != null &&
+                                  lastRoute != Routes.auth &&
+                                  lastRoute != Routes.studentLogin &&
+                                  lastRoute != Routes.parentLogin) {
+                                UnauthenticatedAccessManager().clearLastRoute();
+                                Get.offNamedUntil(
+                                  lastRoute,
+                                  (_) => false,
+                                );
+                              } else {
+                                UnauthenticatedAccessManager().clearLastRoute();
+                                Get.offNamedUntil(Routes.parentHome,
+                                    (Route<dynamic> route) => false);
+                              }
                             } else if (state is SignInFailure) {
                               Utils.showCustomSnackBar(
                                 context: context,
@@ -494,14 +509,27 @@ class _ParentLoginScreenState extends State<ParentLoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Stack(
-        children: [
-          _buildUpperPattern(),
-          _buildLowerPattern(),
-          _buildLoginForm(),
-        ],
+    return BlocListener<BioAuthCubit, BioAuthState>(
+      listener: (context, state) {
+        if (state is BioAuthFailure) {
+          Utils.showCustomSnackBar(
+            context: context,
+            errorMessage: Utils.getTranslatedLabel(
+              "biometricLoginFailedPleaseLoginManually",
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          );
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            _buildUpperPattern(),
+            _buildLowerPattern(),
+            _buildLoginForm(),
+          ],
+        ),
       ),
     );
   }

@@ -18,6 +18,8 @@ final Color shimmerBaseColor = Colors.grey.shade300;
 final Color shimmerhighlightColor = Colors.grey.shade100;
 final Color shimmerContentColor = Colors.white.withValues(alpha: 0.85);
 
+const Color tripTimelineGreenColor = Color(0xff57CC99);
+
 //colors used for status (change to globally apply personalized color)
 final Color greenColor = Colors.green;
 final Color redColor = Colors.red;

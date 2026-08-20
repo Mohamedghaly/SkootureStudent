@@ -9,14 +9,15 @@ const String baseUrl = "https://skooture.ai";
 //Producttion : https://eschool-saas.wrteam.me
 const String databaseUrl = "$baseUrl/api/";
 
-// our Socket url
-const String socketUrl = "ws://193.203.162.252:8090";
+// Reverb WebSocket configuration
+const String reverbUrl =
+    "ws://193.203.162.252:8090/app/e2mhe9gu4tb2x2vkncxa";
 
 //error message display duration
 const Duration errorMessageDisplayDuration = Duration(milliseconds: 3000);
 
-//Web socket ping interval
-const Duration socketPingInterval = Duration(seconds: 275);
+// Reverb reconnect base delay (used with exponential backoff)
+const Duration reverbReconnectDelay = Duration(seconds: 3);
 
 //home menu bottom sheet animation duration
 const Duration homeMenuBottomSheetAnimationDuration = Duration(
@@ -48,6 +49,11 @@ const String defaultParentEmail = "AmberMWayt@gustr.com";
 const String defaultParentPassword = "8200727077";
 // Default school code
 const String defaultSchoolCode = "SCH202412";
+
+/// When [true], screenshots and screen recording are blocked on
+/// sensitive screens (Online Exam, Payment WebView).
+/// Set to [false] to disable screen protection.
+const bool isScreenProtectionEnabled = true;
 
 //animations configuration
 //if this is false all item appearance animations will be turned off
@@ -115,4 +121,18 @@ List<String> months = [
   octoberKey,
   novemberKey,
   decemberKey,
+];
+
+// UI constants
+const double appContentHorizontalPadding = 20.0;
+double bottomsheetBorderRadius = 15.0;
+double topPaddingOfErrorAndLoadingContainer = 150;
+
+/// Transport Report Issue Label Keys
+const List<String> transportReportIssueLabelKeys = [
+  unsafeDrivingKey,
+  unauthorizedPersonKey,
+  missedPickupKey,
+  uncleanBusInteriorKey,
+  busBreakdownKey,
 ];

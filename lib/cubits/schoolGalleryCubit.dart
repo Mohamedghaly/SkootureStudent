@@ -14,7 +14,6 @@ class SchoolGalleryFetchSuccess extends SchoolGalleryState {
   SchoolGalleryFetchSuccess({required this.gallery});
 }
 
-
 class SchoolGalleryFetchFailure extends SchoolGalleryState {
   final String errorMessage;
 
@@ -28,7 +27,6 @@ class SchoolGalleryCubit extends Cubit<SchoolGalleryState> {
 
   void fetchSchoolGallery(
       {required bool useParentApi,
-      int? childId,
       required int sessionYearId,
       int? galleryId}) async {
     try {
@@ -38,7 +36,6 @@ class SchoolGalleryCubit extends Cubit<SchoolGalleryState> {
           gallery: await _schoolRepository.fetchSchoolGallery(
             sessionYearId: sessionYearId,
             useParentApi: useParentApi,
-            childId: childId,
             galleryId: galleryId,
           ),
         ),

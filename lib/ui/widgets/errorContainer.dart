@@ -84,7 +84,7 @@ class ErrorContainer extends StatelessWidget {
                     flex: 1,
                     child: CustomRoundedButton(
                       height: 36,
-                      widthPercentage: 0.3,
+                      widthPercentage: 0.5,
                       backgroundColor: retryButtonBackgroundColor ??
                           Theme.of(context).colorScheme.primary,
                       onTap: () {

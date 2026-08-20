@@ -79,21 +79,6 @@ class _ExamOnlineListContainerState extends State<ExamOnlineListContainer> {
     super.dispose();
   }
 
-  String? _formatIsoDateForDisplay(String? isoDate) {
-    if (isoDate == null || isoDate.isEmpty) return null;
-
-    try {
-      // Parse the ISO date: "2025-07-29 13:23:00"
-      final dateTime = DateTime.parse(isoDate);
-
-      // Format it to match the original display format: "07-29-2025 01:23 PM"
-      final formattedDate = Utils.formatDateAndTime(dateTime);
-      return formattedDate;
-    } catch (e) {
-      // If parsing fails, return null to use fallback
-      return null;
-    }
-  }
 
   Future<void> navigateToExamScreen() async {
     Get.back();

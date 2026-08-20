@@ -13,10 +13,16 @@ class SchoolRepository {
               ? Api.getParentChildSchoolSettingDetails
               : Api.getSchoolSettingDetails,
           useAuthToken: true,
-          queryParameters: useParentApi ? {"child_id": childId ?? 0} : {});
+          queryParameters: useParentApi
+              ? {
+                  "child_id": childId ?? 0,
+                }
+              : {});
 
       return SchoolConfiguration.fromJson(Map.from(result['data'] ?? {}));
-    } catch (e) {
+    } catch (e, st) {
+      print("This is the stack trace: $st");
+      print("This is the error: $e");
       throw ApiException(e.toString());
     }
   }
@@ -45,7 +51,6 @@ class SchoolRepository {
 
   Future<List<Gallery>> fetchSchoolGallery(
       {required bool useParentApi,
-      int? childId,
       required int sessionYearId,
       int? galleryId}) async {
     try {
@@ -54,7 +59,6 @@ class SchoolRepository {
           useAuthToken: true,
           queryParameters: {
             "session_year_id": sessionYearId,
-            "child_id": useParentApi ? childId : null,
             "gallery_id": galleryId
           });
 

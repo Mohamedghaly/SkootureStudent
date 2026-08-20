@@ -131,7 +131,7 @@ class Student {
         guardian = Guardian.fromJson(Map.from(json['guardian'] ?? {})),
         school = School.fromJson(Map.from(json['school'] ?? {})),
         sessionYearId = json['session_year_id'] as int?,
-        rollNumber = json['roll_number'] as int?,
+        rollNumber = int.tryParse(json['roll_number']?.toString() ?? ''),
         admissionDate = json['admission_date'] as String?,
         admissionNo = json['admission_no'] as String?,
         studentProfileExtraDetails = ((json['extra_details'] ?? []) as List)
@@ -169,11 +169,31 @@ class Student {
       };
 
   String getFullName() {
-    return "$firstName $lastName";
+    // Handle null values and return empty string if both are null/empty
+    final first = firstName?.trim() ?? '';
+    final last = lastName?.trim() ?? '';
+
+    if (first.isEmpty && last.isEmpty) {
+      return '';
+    }
+
+    return '$first $last'.trim();
   }
 
   @override
   String toString() {
-    return '$firstName $lastName - ${classSection?.classDetails?.name}${classSection?.section?.name}';
+    final name = getFullName();
+
+    // Build class section string only if we have valid data
+    final className = classSection?.classDetails?.name ?? '';
+    final sectionName = classSection?.section?.name ?? '';
+
+    // Only append class section if at least one of them is not empty
+    if (className.isNotEmpty || sectionName.isNotEmpty) {
+      return '$name - $className$sectionName';
+    }
+
+    // Return just the name if no class section data
+    return name;
   }
 }

@@ -71,7 +71,7 @@ class StudentRepository {
       }).toList();
 
       // if (kDebugMode) {
-      //   print("Result of student subjects api : $result");
+      //   debugPrint("Result of student subjects api : $result");
       // }
 
       //If class have any elective subjects then of key of elective subject will be there
@@ -161,8 +161,11 @@ class StudentRepository {
 
   Future<Map<String, dynamic>> fetchExamResults({
     int? page,
+    int? resultId,
     required bool useParentApi,
-    required int childId,
+    int? childId,
+    int? examId,
+    int? sessionYearId,
   }) async {
     try {
       Map<String, dynamic> queryParameters = {"page": page ?? 0};
@@ -171,6 +174,15 @@ class StudentRepository {
       }
       if (useParentApi) {
         queryParameters.addAll({"child_id": childId});
+      }
+      if (resultId != null) {
+        queryParameters.addAll({"result_id": resultId});
+      }
+      if (examId != null) {
+        queryParameters.addAll({"exam_id": examId});
+      }
+      if (sessionYearId != null) {
+        queryParameters.addAll({"session_year_id": sessionYearId});
       }
       final result = await Api.get(
         url: useParentApi ? Api.getStudentResultsParent : Api.studentResults,
@@ -185,7 +197,7 @@ class StudentRepository {
       };
     } catch (e, stc) {
       if (kDebugMode) {
-        print(stc.toString());
+        debugPrint(stc.toString());
       }
       throw ApiException(e.toString());
     }
@@ -223,7 +235,7 @@ class StudentRepository {
             SessionYear.fromJson(Map.from(result['data']['session_year'] ?? {}))
       };
     } catch (e, st) {
-      print("This is the st : ${st}");
+      debugPrint("This is the st : ${st}");
       throw ApiException(e.toString());
     }
   }
@@ -249,7 +261,7 @@ class StudentRepository {
           .toList();
     } catch (e, st) {
       if (kDebugMode) {
-        print("This is the st : ${st}");
+        debugPrint("This is the st : ${st}");
       }
       throw ApiException(e.toString());
     }
@@ -292,7 +304,7 @@ class StudentRepository {
         },
       );
       if (kDebugMode) {
-        print("response -- ${result['data'] as List}");
+        debugPrint("response -- ${result['data'] as List}");
       }
       return (result['data'] as List)
           .map((e) => PaidFees.fromJson(Map.from(e)))
@@ -432,7 +444,7 @@ class StudentRepository {
       return statusOfTransaction;
     } on PlatformException catch (err) {
       if (kDebugMode) {
-        print(err);
+        debugPrint(err.toString());
       }
       throw ApiException(
         StripeService.getPlatformExceptionErrorResult(err).message ??
@@ -440,7 +452,7 @@ class StudentRepository {
       );
     } catch (error) {
       if (kDebugMode) {
-        print(error);
+        debugPrint(error.toString());
       }
       throw ApiException(ErrorMessageKeysAndCode.defaultErrorMessageCode);
     }

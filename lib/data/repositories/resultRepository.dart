@@ -9,6 +9,7 @@ class ResultRepository {
     required int classSubjectId,
     required bool useParentApi,
     required int childId,
+    int? sessionYearId,
   }) async {
     try {
       final result = await Api.get(
@@ -20,6 +21,7 @@ class ResultRepository {
           if (classSubjectId != 0) 'class_subject_id': classSubjectId,
           if (page != 0) 'page': page ?? 1,
           if (useParentApi) 'child_id': childId,
+          if (sessionYearId != null) 'session_year_id': sessionYearId,
         },
       );
 
@@ -68,7 +70,7 @@ class ResultRepository {
       return result['pdf'] ?? "";
     } catch (e) {
       if (kDebugMode) {
-        print(e.toString());
+        debugPrint(e.toString());
       }
       throw ApiException(e.toString());
     }

@@ -1,5 +1,7 @@
 import 'package:eschool/cubits/resultsCubit.dart';
+import 'package:eschool/cubits/schoolSessionYearsCubit.dart';
 import 'package:eschool/data/models/subject.dart';
+import 'package:eschool/data/repositories/schoolRepository.dart';
 import 'package:eschool/data/repositories/studentRepository.dart';
 import 'package:eschool/ui/widgets/resultsContainer.dart';
 
@@ -18,8 +20,15 @@ class ChildResultsScreen extends StatelessWidget {
 
   static Widget routeInstance() {
     final arguments = Get.arguments as Map<String, dynamic>;
-    return BlocProvider<ResultsCubit>(
-      create: (context) => ResultsCubit(StudentRepository()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ResultsCubit>(
+          create: (context) => ResultsCubit(StudentRepository()),
+        ),
+        BlocProvider<SchoolSessionYearsCubit>(
+          create: (context) => SchoolSessionYearsCubit(SchoolRepository()),
+        ),
+      ],
       child: ChildResultsScreen(
         childId: arguments['childId'],
         subjects: arguments['subjects'],
