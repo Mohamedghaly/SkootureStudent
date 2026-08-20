@@ -29,7 +29,12 @@
      - Added `path_provider_foundation: 2.4.1` dependency override.
      - Added translation keys to `en.json`, `ar.json`, and `fr.json`.
      - Updated project version to `1.2.0+1`.
-- **Result:** `flutter analyze lib` passed with 0 errors/warnings; iOS app builds and launches without native plugin collision.
+  5. **Runtime Exceptions & API Alignment Fixes:**
+     - Resolved `type 'int' is not a subtype of type 'Map<String, dynamic>?'` in `StudentProfileScreen.routeInstance` by dynamically supporting `int`, `Map`, and `null` arguments.
+     - Resolved `type 'List<dynamic>' is not a subtype of type 'Map<dynamic, dynamic>'` in `TransportRepository.getCurrentTransportPlan` by implementing `_extractDataMap` for empty list responses.
+     - Resolved `student_id` missing parameter error on `/api/teachers` in `ParentRepository.fetchChildTeachers`.
+     - Resolved `User id is required` on `student/id-card` by establishing complete fallback chains across `StudentProfileScreen`, `StudentRepository.downloadIdCard`, and `DownloadStudentIdCardCubit`.
+- **Result:** `flutter analyze lib` passed with 0 errors/warnings; iOS app builds and launches without native plugin collision and all reported runtime regressions resolved.
 
 ---
 

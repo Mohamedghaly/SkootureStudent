@@ -31,7 +31,8 @@ This log documents the successful merge of core updates and features from `e-sch
 ### 5. Runtime Fixes & Stability
 *   **Student Profile Route Argument Parsing**: Fixed `type 'int' is not a subtype of type 'Map<String, dynamic>?'` exception when navigating from parent child view to student profile by updating `StudentProfileScreen.routeInstance()` to handle both `int` and `Map<String, dynamic>` arguments.
 *   **Transport Plan Deserialization**: Fixed `type 'List<dynamic>' is not a subtype of type 'Map<dynamic, dynamic>'` in `TransportRepository.getCurrentTransportPlan` by implementing defensive `_extractDataMap` parser when backend returns empty lists.
-*   **Teachers Endpoint Alignment**: Updated `ParentRepository.fetchChildTeachers` to pass `student_id` and `child_id` query parameters matching the backend API requirement.
+*   **Teachers Endpoint Alignment**: Updated `ParentRepository.fetchChildTeachers` to pass `student_id` and `child_id` query parameters matching backend API requirements.
+*   **Student ID Card User ID Resolution**: Resolved `User id is required` API error on `student/id-card` by establishing a complete fallback chain (`widget.userId ?? studentDetails.userId ?? studentDetails.childUserDetails?.id ?? studentDetails.id ?? widget.childId`) and fallback to `AuthRepository.getStudentDetails()` in `StudentRepository.downloadIdCard` and `DownloadStudentIdCardCubit`.
 
 ## Current Status
 *   **Branch**: `feature/mergeNewUpdates`
