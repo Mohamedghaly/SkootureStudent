@@ -49,3 +49,6 @@ pubspec.lock
 
 # FVM Version Cache
 .fvm/ios/build/
+
+# Upstream reference archives
+AI/e-school-saas/

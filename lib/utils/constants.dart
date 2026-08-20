@@ -30,6 +30,10 @@ const Duration changeSliderDuration = Duration(seconds: 5);
 //Number of latest notices to show in home container
 const int numberOfLatestNoticesInHomeScreen = 3;
 
+//Number of online classes to show in the home/student-details container
+//(the "View All" button leads to the full timetable)
+const int numberOfOnlineClassesInHomeScreen = 3;
+
 //Maximum characters to show in announcement description before "Read More"
 const int maxAnnouncementDescriptionLength = 100;
 

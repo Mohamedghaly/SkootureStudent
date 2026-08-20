@@ -4,6 +4,7 @@ class ChildUserDetails {
   final int? id;
   final String? firstName;
   final String? lastName;
+  final String? countryCode;
   final String? mobile;
   final String? email;
   final String? gender;
@@ -30,6 +31,7 @@ class ChildUserDetails {
       {this.id,
       this.firstName,
       this.lastName,
+      this.countryCode,
       this.mobile,
       this.email,
       this.gender,
@@ -56,6 +58,7 @@ class ChildUserDetails {
       {int? id,
       String? firstName,
       String? lastName,
+      String? countryCode,
       String? mobile,
       String? email,
       String? gender,
@@ -82,6 +85,7 @@ class ChildUserDetails {
       id: id ?? this.id,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
+      countryCode: countryCode ?? this.countryCode,
       mobile: mobile ?? this.mobile,
       email: email ?? this.email,
       gender: gender ?? this.gender,
@@ -109,6 +113,7 @@ class ChildUserDetails {
       : id = json['id'] as int?,
         firstName = json['first_name'] as String?,
         lastName = json['last_name'] as String?,
+        countryCode = json['country_code']?.toString(),
         mobile = json['mobile'] as String?,
         email = json['email'] as String?,
         gender = json['gender'] as String?,
@@ -135,6 +140,7 @@ class ChildUserDetails {
         'id': id,
         'first_name': firstName,
         'last_name': lastName,
+        'country_code': countryCode,
         'mobile': mobile,
         'email': email,
         'gender': gender,

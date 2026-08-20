@@ -19,9 +19,10 @@ const int expenseManagementModuleId = 14;
 const int staffLeaveManagementModuleId = 15;
 const int feesManagementModuleId = 16;
 const int galleryManagementModuleId = 17;
+const int certificateManagementModuleId = 18;
+const int transportationManagementModuleId = 21;
 
 //
 const int chatModuleId = 20;
 const int defaultModuleId = -1;
 const String moduleIdJoiner = "#";
-const int transportationManagementModuleId = 21;

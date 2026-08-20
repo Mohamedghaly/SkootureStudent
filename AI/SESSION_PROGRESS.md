@@ -1,3 +1,38 @@
+# Session Progress - August 20, 2026
+
+## Summary of Completed Tasks
+
+### 1. Merge `e-school-saas` v1.10.0 Updates & Features
+- **Objective:** Merge updates and new features from `e-school-saas` v1.10.0 into `SkootureStudent` while strictly preserving all custom branding, base URLs, Firebase project, biometric authentication, and transport/diary modules.
+- **Completed Changes:**
+  1. **Assets & Models:**
+     - Added `user_pro_phone_icon.svg` asset.
+     - Added `certificateAssignment.dart` model.
+     - Updated `studentProfileExtraDetails.dart` (`fileUrl` and `FormField.type`).
+     - Added `countryCode` parsing across `Student`, `Guardian`, `Teacher`, `ChildUserDetails`, `StudentDetails`, and `StudentUser`.
+     - Added defensive type casting (`_toInt()`, `_toIntOrNull()`, `_parseMobile()`, `_parseString()`).
+  2. **Utilities & Constants:**
+     - Added `numberOfOnlineClassesInHomeScreen` to `constants.dart` (preserved `baseUrl`, `reverbUrl`, etc.).
+     - Added `Utils.formatMobileNumber()`, `Utils.getIconForFieldType()`, `Utils.getFeePaymentStatusColor()`, and `Utils.intlLocaleFor()`.
+     - Enhanced `Utils.showImagePreview()` with Hero animation support and close styling.
+     - Added `Api.downloadStudentIdCard`, `Api.getCertificateAssignments`, and `Api.generateCertificate`.
+     - Added `certificateManagementModuleId = 18` to `systemModules.dart`.
+  3. **UI Screens & Widgets:**
+     - Modernized `ChildTeachersScreen` with subject grouping and `_SubjectsBottomSheet`.
+     - Updated `StudentProfileScreen` with ID card download, phone number tile, dynamic form fields, and image zoom preview.
+     - Updated `GuardianDetailsContainer` with image preview and country-code phone formatting.
+     - Updated `CustomAppBar` trailing padding.
+  4. **Dependencies, Build Fixes & Localizations:**
+     - Resolved iOS runtime crash (`NSInternalInconsistencyException: Duplicate plugin key: OpenFilePlugin`) by removing redundant `open_file` and standardizing on `open_filex: ^4.7.0`.
+     - Updated `studentProfileScreen.dart` to use `OpenFilex.open()`.
+     - Reinstalled iOS CocoaPods via `pod install`.
+     - Added `path_provider_foundation: 2.4.1` dependency override.
+     - Added translation keys to `en.json`, `ar.json`, and `fr.json`.
+     - Updated project version to `1.2.0+1`.
+- **Result:** `flutter analyze lib` passed with 0 errors/warnings; iOS app builds and launches without native plugin collision.
+
+---
+
 # Session Progress - May 10, 2026
 
 ## Summary of Completed Tasks

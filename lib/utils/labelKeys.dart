@@ -599,4 +599,46 @@ const String waitingForConnectionKey = "waitingForConnection";
 
 const String noChildrenFoundKey = "noChildren";
 
-const String yourTransportationRequestWasRejectedKey = "yourTransportationRequestWasRejected";const String yourRequestIsBeingProcessedKey = "yourRequestIsBeingProcessed";
+const String yourTransportationRequestWasRejectedKey = "yourTransportationRequestWasRejected";
+const String yourRequestIsBeingProcessedKey = "yourRequestIsBeingProcessed";
+
+// ID Card keys
+const String idCardKey = "idCard";
+const String downloadingIdCardKey = "downloadingIdCard";
+const String tapToViewFileKey = "tapToViewFile";
+
+// Certificate module keys
+const String certificateKey = "certificate";
+const String noCertificatesFoundKey = "noCertificatesFound";
+const String admissionNoKey = "admissionNo";
+const String downloadCertificateKey = "downloadCertificate";
+const String issuedDateKey = "issuedDate";
+const String downloadInvoiceKey = "downloadInvoice";
+
+const String offlineExamKey = "offlineExam";
+const String assignmentReportKey = "assignmentReport";
+const String diaryReportKey = "diaryReport";
+const String averageMarkKey = "averageMark";
+const String topPositiveCategoryKey = "topPositiveCategory";
+const String topNegativeCategoryKey = "topNegativeCategory";
+const String bestExamPerformanceKey = "bestExamPerformance";
+const String weakExamPerformanceKey = "weakExamPerformance";
+const String viewAssignmentKey = "viewAssignment";
+const String viewDiaryKey = "viewDiary";
+const String viewExamResultKey = "viewExamResult";
+const String viewOfflineExamKey = "viewOfflineExam";
+const String overallScoreKey = "overallScore";
+
+// Fee discount / relief keys
+const String feeReliefKey = "feeRelief";
+const String feeRelief = "relief";
+const String totalReliefKey = "totalRelief";
+const String reliefAmountKey = "reliefAmount";
+const String payableAmountKey = "payableAmount";
+const String totalFeeAmountKey = "totalFeeAmount";
+const String discountKey = "discount";
+const String appliedOnKey = "appliedOn";
+const String feeBreakdownKey = "feeBreakdown";
+const String dueChargeIsKey = "dueChargeIs";
+const String ofDecidedInstallmentAmountKey = "ofDecidedInstallmentAmount";
+const String dueChargesKey = "dueCharges";

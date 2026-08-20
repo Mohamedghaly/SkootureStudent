@@ -332,6 +332,29 @@ class StudentRepository {
     }
   }
 
+  Future<Uint8List> downloadIdCard({int? userId}) async {
+    try {
+      final result = await Api.get(
+        url: Api.downloadStudentIdCard,
+        useAuthToken: true,
+        queryParameters: userId != null ? {"user_id": userId} : null,
+      );
+
+      if (result['pdf'] == null) {
+        throw ApiException(
+          result['message']?.toString() ??
+              ErrorMessageKeysAndCode.defaultErrorMessageCode,
+        );
+      }
+
+      return base64Decode(result['pdf']);
+    } catch (e, st) {
+      debugPrint(st.toString());
+      debugPrint(e.toString());
+      throw ApiException(e.toString());
+    }
+  }
+
 /*
   Future<Map> addFeesTransaction({
     required double transactionAmount,

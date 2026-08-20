@@ -1,3 +1,41 @@
+# SkootureStudent Project Update Log - August 20, 2026
+
+## Overview
+This log documents the successful merge of core updates and features from `e-school-saas` v1.10.0 into the `SkootureStudent` project while preserving all Skooture customizations, branding, base URLs, Firebase configurations, biometric authentication, and transport/diary modules.
+
+## Key Accomplishments
+
+### 1. International Phone Formatting & Model Upgrades
+*   **Country Code Standardization**: Added `countryCode` / `country_code` parsing to `Student`, `Guardian`, `Teacher`, `ChildUserDetails`, `StudentDetails`, and `StudentUser` models.
+*   **Formatting Utility**: Integrated `Utils.formatMobileNumber({countryCode, mobile})` to properly format international phone numbers with `+` prefixes.
+*   **Defensive Type Parsing**: Integrated `_toInt()`, `_toIntOrNull()`, `_parseMobile()`, and `_parseString()` across models to prevent runtime casting crashes on dynamic backend payloads.
+
+### 2. Student ID Card & Certificate Integration
+*   **ID Card Download**: Integrated `DownloadStudentIdCardCubit`, `DownloadStudentIdCardDialog`, and `Api.downloadStudentIdCard` to retrieve, decode (Base64 PDF), save, and open the generated ID card.
+*   **Certificate Models**: Added `CertificateAssignment` and supporting models (`CertificateUser`, `CertificateTemplate`, `CertificateExam`).
+*   **System Module**: Configured `certificateManagementModuleId = 18` in `systemModules.dart`.
+
+### 3. UI/UX Modernization
+*   **Teacher Subject Grouping**: Completely modernized `ChildTeachersScreen` with `_groupByTeacher()` consolidation, subject badges, and expandable `_SubjectsBottomSheet`.
+*   **Profile Enhancements**: Added phone number tile with `user_pro_phone_icon.svg`, dynamic form field rendering (checkbox parsing, file viewing), profile photo pinch-to-zoom preview with Hero animations, and logout action.
+*   **Guardian Details**: Added Hero image preview and country-code phone formatting.
+
+### 4. Localization & Dependencies
+*   **Multi-language Support**: Synchronized new translation keys across English (`en.json`), Arabic (`ar.json`), and French (`fr.json`).
+*   **Build Health & Plugin Deduplication**:
+    *   Resolved iOS crash (`Duplicate plugin key: OpenFilePlugin`) by removing redundant `open_file` package and standardizing on `open_filex: ^4.7.0` (which avoids broad media permission injections).
+    *   Updated `StudentProfileScreen` to invoke `OpenFilex.open()`.
+    *   Rebuilt CocoaPods with `pod install` in `ios/`.
+    *   Maintained `path_provider_foundation: 2.4.1` dependency override.
+    *   Verified 0 static analysis errors (`flutter analyze lib` passed cleanly).
+
+## Current Status
+*   **Branch**: `feature/mergeNewUpdates`
+*   **Version**: `1.2.0+1`
+*   **Health**: `flutter analyze lib` passes with 0 issues; iOS CocoaPods and Xcode build cleanly without plugin collisions.
+
+---
+
 # SkootureStudent Project Update Log - May 10, 2026
 
 ## Overview

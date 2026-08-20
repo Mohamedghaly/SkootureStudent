@@ -9,6 +9,7 @@ class Student {
   final int? userId;
   final String? firstName;
   final String? lastName;
+  final String? countryCode;
   final String? mobile;
   final String? gender;
   final String? image;
@@ -35,6 +36,7 @@ class Student {
       this.firstName,
       this.userId,
       this.lastName,
+      this.countryCode,
       this.mobile,
       this.gender,
       this.image,
@@ -60,6 +62,7 @@ class Student {
       {int? id,
       String? firstName,
       String? lastName,
+      String? countryCode,
       String? mobile,
       String? gender,
       String? image,
@@ -87,6 +90,7 @@ class Student {
         childUserDetails: childUserDetails ?? this.childUserDetails,
         firstName: firstName ?? this.firstName,
         lastName: lastName ?? this.lastName,
+        countryCode: countryCode ?? this.countryCode,
         mobile: mobile ?? this.mobile,
         gender: gender ?? this.gender,
         image: image ?? this.image,
@@ -116,6 +120,7 @@ class Student {
         userId = json['user_id'] as int?,
         firstName = json['first_name'] as String?,
         lastName = json['last_name'] as String?,
+        countryCode = json['country_code']?.toString(),
         mobile = json['mobile'] as String?,
         gender = json['gender'] as String?,
         image = json['image'] as String?,
@@ -144,6 +149,7 @@ class Student {
         'id': id,
         'first_name': firstName,
         'last_name': lastName,
+        'country_code': countryCode,
         'mobile': mobile,
         'gender': gender,
         'image': image,

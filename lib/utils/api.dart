@@ -178,6 +178,12 @@ class Api {
   static String getParentDiaryCategories =
       "${databaseUrl}parent/diary-categories";
 
+  static String downloadStudentIdCard = "${databaseUrl}student/id-card";
+
+  /// Certificate
+  static String getCertificateAssignments = "${databaseUrl}certificate/assign";
+  static String generateCertificate = "${databaseUrl}certificate/generate";
+
   /// Transportation
   static String getPickupPoints = "${databaseUrl}pickup-points";
   static String getTransportationShifts = "${databaseUrl}transportation-shifts";

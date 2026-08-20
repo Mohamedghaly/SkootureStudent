@@ -8,6 +8,7 @@ import 'package:eschool/data/models/studyMaterial.dart';
 import 'package:eschool/data/repositories/subjectRepository.dart';
 import 'package:eschool/ui/widgets/downloadFileBottomsheetContainer.dart';
 import 'package:eschool/ui/widgets/errorMessageOverlayContainer.dart';
+import 'package:eschool/utils/appLanguages.dart';
 import 'package:eschool/utils/constants.dart';
 import 'package:eschool/utils/errorMessageKeysAndCodes.dart';
 import 'package:eschool/utils/labelKeys.dart';
@@ -21,7 +22,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:eschool/ui/widgets/customCircularProgressIndicator.dart';
 
 // ignore: avoid_classes_with_only_static_members
 class Utils {
@@ -107,8 +107,45 @@ class Utils {
     return "assets/images/$imageName";
   }
 
+  /// Returns the appropriate icon path based on the field type
+  /// Used for displaying dynamic icons for form fields
+  static String getIconForFieldType(String? fieldType) {
+    switch (fieldType?.toLowerCase()) {
+      case 'textarea':
+        return getImagePath('text_fields.svg');
+      case 'checkbox':
+        return getImagePath('checkbox.svg');
+      case 'radio':
+        return getImagePath('radio_button_checked.svg');
+      case 'text':
+        return getImagePath('title.svg');
+      case 'number':
+        return getImagePath('numbers.svg');
+      case 'dropdown':
+        return getImagePath('chevron-down.svg');
+      case 'file':
+        return getImagePath('info_pro_icon.svg');
+      default:
+        return getImagePath('info_pro_icon.svg');
+    }
+  }
+
   static ColorScheme getColorScheme(BuildContext context) {
     return Theme.of(context).colorScheme;
+  }
+
+  /// Colour for a fee payment status label (as returned by
+  /// [ChildFeeDetails.getFeePaymentStatus]). Single source of truth so the fee
+  /// list and the fee detail header stay in sync.
+  static Color getFeePaymentStatusColor(
+      BuildContext context, String statusKey) {
+    if (statusKey == paidKey) {
+      return Theme.of(context).colorScheme.onSecondary;
+    }
+    if (statusKey == partiallyPaidKey) {
+      return Colors.orange;
+    }
+    return Theme.of(context).colorScheme.error;
   }
 
   static Locale getLocaleFromLanguageCode(String languageCode) {
@@ -425,6 +462,24 @@ class Utils {
     return dateString.isEmpty ? '--' : dateString;
   }
 
+  /// Locale that `intl` actually holds date symbols for.
+  ///
+  /// Panel-managed languages may use codes that are not real ICU locales — the
+  /// panel accepts anything (e.g. "test", "002"). [intl.DateFormat] throws an
+  /// `ArgumentError` on those instead of degrading, so unknown codes fall back
+  /// to the app default.
+  static String intlLocaleFor(String languageCode) {
+    for (final candidate in [
+      languageCode.replaceAll("-", "_"),
+      defaultLanguageCode,
+    ]) {
+      if (intl.DateFormat.localeExists(candidate)) {
+        return candidate;
+      }
+    }
+    return "en_US";
+  }
+
   static String dateConverter(
     DateTime myEndDate,
     BuildContext contxt,
@@ -432,10 +487,11 @@ class Utils {
   ) {
     String date;
 
-    final formattedDate = intl.DateFormat('dd MMM, yyyy',
-            contxt.read<AppLocalizationCubit>().state.language.languageCode)
-        .add_jm()
-        .format(myEndDate);
+    final formattedDate = intl.DateFormat(
+      'dd MMM, yyyy',
+      intlLocaleFor(
+          contxt.read<AppLocalizationCubit>().state.language.languageCode),
+    ).add_jm().format(myEndDate);
 
     final formattedTime = intl.DateFormat('hh:mm a').format(myEndDate);
     //check for today or tomorrow or specific date
@@ -464,6 +520,27 @@ class Utils {
   //It will return - if given value is empty
   static String formatEmptyValue(String value) {
     return value.isEmpty ? "-" : value;
+  }
+
+  //It will prefix the country code to the mobile number - +91 9876543210
+  //Returns empty string if mobile number is empty and
+  //returns the mobile number as it is if country code is not available
+  static String formatMobileNumber({String? countryCode, String? mobile}) {
+    final String number = (mobile ?? "").trim();
+    if (number.isEmpty) {
+      return "";
+    }
+
+    //Country code can come as 91, +91 or 0091 from the backend
+    final String code =
+        (countryCode ?? "").replaceAll(RegExp(r'[^0-9]'), '').trim();
+
+    //Mobile number already contains the country code
+    if (code.isEmpty || number.startsWith("+")) {
+      return number;
+    }
+
+    return "+$code $number";
   }
 
   static Future<bool> forceUpdate(String updatedVersion) async {
@@ -910,61 +987,55 @@ class _ImagePreviewDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget content = InteractiveViewer(
+      minScale: 0.8,
+      maxScale: 4.0,
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.contain,
+        placeholder: (context, url) => const SizedBox(
+          width: 48,
+          height: 48,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          ),
+        ),
+        errorWidget: (context, url, error) => const Icon(
+          Icons.broken_image_outlined,
+          color: Colors.white70,
+          size: 48,
+        ),
+      ),
+    );
+
+    if ((heroTag ?? '').isNotEmpty) {
+      content = Hero(tag: heroTag!, child: content);
+    }
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          Center(
-            child: InteractiveViewer(
-              minScale: 0.5,
-              maxScale: 4.0,
-              child: heroTag != null
-                  ? Hero(
-                      tag: heroTag!,
-                      child: CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => Center(
-                          child: CustomCircularProgressIndicator(
-                            indicatorColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => const Icon(
-                          Icons.error,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => Center(
-                        child: CustomCircularProgressIndicator(
-                          indicatorColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => const Icon(
-                        Icons.error,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            right: 20,
-            child: IconButton(
-              icon: const Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 30,
+      backgroundColor: Colors.black.withValues(alpha: 0.92),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Center(child: content),
+            Positioned(
+              top: 16,
+              right: 16,
+              child: IconButton(
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black.withValues(alpha: 0.35),
+                ),
+                icon: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                ),
+                tooltip: 'Close',
+                onPressed: () => Navigator.of(context).maybePop(),
               ),
-              onPressed: () => Navigator.of(context).pop(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

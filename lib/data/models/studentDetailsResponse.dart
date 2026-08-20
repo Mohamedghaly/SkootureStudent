@@ -1,5 +1,21 @@
 import 'package:eschool/data/models/subject.dart';
 
+// Safely converts a dynamic JSON value (int, double, or numeric String) to an int.
+int _toInt(dynamic value) {
+  if (value == null) return 0;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  return int.tryParse(value.toString()) ?? 0;
+}
+
+// Like [_toInt] but preserves null for optional fields.
+int? _toIntOrNull(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value;
+  if (value is double) return value.toInt();
+  return int.tryParse(value.toString());
+}
+
 class StudentDetailsResponse {
   final int id;
   final int userId;
@@ -52,20 +68,20 @@ class StudentDetailsResponse {
   });
 
   StudentDetailsResponse.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
-        userId = (json['user_id'] ?? 0) as int,
-        classId = json['class_id'] as int?,
-        classSectionId = (json['class_section_id'] ?? 0) as int,
+      : id = _toInt(json['id']),
+        userId = _toInt(json['user_id']),
+        classId = _toIntOrNull(json['class_id']),
+        classSectionId = _toInt(json['class_section_id']),
         applicationType = (json['application_type'] ?? '') as String,
         admissionNo = (json['admission_no'] ?? '') as String,
-        rollNumber = (json['roll_number'] ?? 0) as int,
+        rollNumber = _toInt(json['roll_number']),
         admissionDate = (json['admission_date'] ?? '') as String,
-        schoolId = (json['school_id'] ?? 0) as int,
-        applicationStatus = (json['application_status'] ?? 0) as int,
-        guardianId = (json['guardian_id'] ?? 0) as int,
-        joinSessionYearId = json['join_session_year_id'] as int?,
-        leaveSessionYearId = json['leave_session_year_id'] as int?,
-        sessionYearId = (json['session_year_id'] ?? 0) as int,
+        schoolId = _toInt(json['school_id']),
+        applicationStatus = _toInt(json['application_status']),
+        guardianId = _toInt(json['guardian_id']),
+        joinSessionYearId = _toIntOrNull(json['join_session_year_id']),
+        leaveSessionYearId = _toIntOrNull(json['leave_session_year_id']),
+        sessionYearId = _toInt(json['session_year_id']),
         createdAt = (json['created_at'] ?? '') as String,
         updatedAt = (json['updated_at'] ?? '') as String,
         deletedAt = json['deleted_at'] as String?,
@@ -194,16 +210,16 @@ class CoreSubject {
   });
 
   CoreSubject.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
+      : id = _toInt(json['id']),
         name = (json['name'] ?? '') as String,
         code = (json['code'] ?? '') as String,
         bgColor = (json['bg_color'] ?? '') as String,
         image = (json['image'] ?? '') as String,
-        mediumId = (json['medium_id'] ?? 0) as int,
+        mediumId = _toInt(json['medium_id']),
         type = (json['type'] ?? '') as String,
-        schoolId = (json['school_id'] ?? 0) as int,
+        schoolId = _toInt(json['school_id']),
         deletedAt = json['deleted_at'] as String?,
-        classSubjectId = (json['class_subject_id'] ?? 0) as int,
+        classSubjectId = _toInt(json['class_subject_id']),
         nameWithType = (json['name_with_type'] ?? '') as String,
         pivot = json['pivot'] != null && json['pivot'] is Map
             ? Pivot.fromJson(Map<String, dynamic>.from(json['pivot']))
@@ -236,7 +252,7 @@ class ElectiveSubject {
   });
 
   ElectiveSubject.fromJson(Map<String, dynamic> json)
-      : classSubjectId = json['class_subject_id'] as int,
+      : classSubjectId = _toInt(json['class_subject_id']),
         classSubject =
             ClassSubject.fromJson(Map.from(json['class_subject'] ?? {}));
 
@@ -278,15 +294,15 @@ class ClassSubject {
   });
 
   ClassSubject.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
-        classId = (json['class_id'] ?? 0) as int,
-        subjectId = (json['subject_id'] ?? 0) as int,
+      : id = _toInt(json['id']),
+        classId = _toInt(json['class_id']),
+        subjectId = _toInt(json['subject_id']),
         type = (json['type'] ?? '') as String,
         electiveSubjectGroupId =
-            (json['elective_subject_group_id'] ?? 0) as int,
-        semesterId = json['semester_id'] as int?,
-        virtualSemesterId = (json['virtual_semester_id'] ?? 0) as int,
-        schoolId = (json['school_id'] ?? 0) as int,
+            _toInt(json['elective_subject_group_id']),
+        semesterId = _toIntOrNull(json['semester_id']),
+        virtualSemesterId = _toInt(json['virtual_semester_id']),
+        schoolId = _toInt(json['school_id']),
         deletedAt = json['deleted_at'] as String?,
         createdAt = (json['created_at'] ?? '') as String,
         updatedAt = (json['updated_at'] ?? '') as String,
@@ -322,9 +338,9 @@ class Pivot {
   });
 
   Pivot.fromJson(Map<String, dynamic> json)
-      : classId = (json['class_id'] ?? 0) as int,
-        subjectId = (json['subject_id'] ?? 0) as int,
-        semesterId = json['semester_id'] as int?;
+      : classId = _toInt(json['class_id']),
+        subjectId = _toInt(json['subject_id']),
+        semesterId = _toIntOrNull(json['semester_id']);
 
   Map<String, dynamic> toJson() => {
         'class_id': classId,
@@ -337,6 +353,7 @@ class StudentUser {
   final int id;
   final String firstName;
   final String lastName;
+  final String? countryCode;
   final String? mobile;
   final String email;
   final String gender;
@@ -365,6 +382,7 @@ class StudentUser {
     required this.id,
     required this.firstName,
     required this.lastName,
+    this.countryCode,
     this.mobile,
     required this.email,
     required this.gender,
@@ -391,9 +409,10 @@ class StudentUser {
   });
 
   StudentUser.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
+      : id = _toInt(json['id']),
         firstName = (json['first_name'] ?? '') as String,
         lastName = (json['last_name'] ?? '') as String,
+        countryCode = json['country_code']?.toString(),
         mobile = json['mobile'] as String?,
         email = (json['email'] ?? '') as String,
         gender = (json['gender'] ?? '') as String,
@@ -402,13 +421,13 @@ class StudentUser {
         currentAddress = (json['current_address'] ?? '') as String,
         permanentAddress = (json['permanent_address'] ?? '') as String,
         occupation = json['occupation'] as String?,
-        status = (json['status'] ?? 0) as int,
-        resetRequest = (json['reset_request'] ?? 0) as int,
+        status = _toInt(json['status']),
+        resetRequest = _toInt(json['reset_request']),
         fcmId = (json['fcm_id'] ?? '') as String,
-        schoolId = (json['school_id'] ?? 0) as int,
+        schoolId = _toInt(json['school_id']),
         language = (json['language'] ?? 'en') as String,
         emailVerifiedAt = json['email_verified_at'] as String?,
-        twoFactorEnabled = (json['two_factor_enabled'] ?? 0) as int,
+        twoFactorEnabled = _toInt(json['two_factor_enabled']),
         twoFactorSecret = json['two_factor_secret'] as String?,
         twoFactorExpiresAt = json['two_factor_expires_at'] as String?,
         createdAt = (json['created_at'] ?? '') as String,
@@ -422,6 +441,7 @@ class StudentUser {
         'id': id,
         'first_name': firstName,
         'last_name': lastName,
+        'country_code': countryCode,
         'mobile': mobile,
         'email': email,
         'gender': gender,
@@ -476,11 +496,11 @@ class StudentClassSection {
   });
 
   StudentClassSection.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
-        classId = (json['class_id'] ?? 0) as int,
-        sectionId = (json['section_id'] ?? 0) as int,
-        mediumId = (json['medium_id'] ?? 0) as int,
-        schoolId = (json['school_id'] ?? 0) as int,
+      : id = _toInt(json['id']),
+        classId = _toInt(json['class_id']),
+        sectionId = _toInt(json['section_id']),
+        mediumId = _toInt(json['medium_id']),
+        schoolId = _toInt(json['school_id']),
         deletedAt = json['deleted_at'] as String?,
         name = (json['name'] ?? '') as String,
         fullName = (json['full_name'] ?? '') as String,
@@ -529,13 +549,13 @@ class StudentClass {
   });
 
   StudentClass.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
+      : id = _toInt(json['id']),
         name = (json['name'] ?? '') as String,
-        includeSemesters = (json['include_semesters'] ?? 0) as int,
-        mediumId = (json['medium_id'] ?? 0) as int,
-        shiftId = json['shift_id'] as int?,
-        streamId = json['stream_id'] as int?,
-        schoolId = (json['school_id'] ?? 0) as int,
+        includeSemesters = _toInt(json['include_semesters']),
+        mediumId = _toInt(json['medium_id']),
+        shiftId = _toIntOrNull(json['shift_id']),
+        streamId = _toIntOrNull(json['stream_id']),
+        schoolId = _toInt(json['school_id']),
         deletedAt = json['deleted_at'] as String?,
         fullName = (json['full_name'] ?? '') as String,
         semesterName = (json['semester_name'] ?? '') as String;
@@ -568,9 +588,9 @@ class StudentSection {
   });
 
   StudentSection.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
+      : id = _toInt(json['id']),
         name = (json['name'] ?? '') as String,
-        schoolId = (json['school_id'] ?? 0) as int,
+        schoolId = _toInt(json['school_id']),
         deletedAt = json['deleted_at'] as String?;
 
   Map<String, dynamic> toJson() => {
@@ -595,9 +615,9 @@ class StudentMedium {
   });
 
   StudentMedium.fromJson(Map<String, dynamic> json)
-      : id = (json['id'] ?? 0) as int,
+      : id = _toInt(json['id']),
         name = (json['name'] ?? '') as String,
-        schoolId = (json['school_id'] ?? 0) as int,
+        schoolId = _toInt(json['school_id']),
         deletedAt = json['deleted_at'] as String?;
 
   Map<String, dynamic> toJson() => {

@@ -28,7 +28,10 @@ class GuardianDetailsContainer extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.75),
               fontSize: 13.0,
             ),
           ),
@@ -69,13 +72,28 @@ class GuardianDetailsContainer extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Theme.of(context).scaffoldBackgroundColor,
               ),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Theme.of(context).colorScheme.primary,
+              child: GestureDetector(
+                onTap: () {
+                  final imageUrl = guardian.image ?? '';
+                  if (imageUrl.isNotEmpty) {
+                    Utils.showImagePreview(
+                      context: context,
+                      imageUrl: imageUrl,
+                      heroTag: 'guardian_profile_image_${guardian.id}',
+                    );
+                  }
+                },
+                child: Hero(
+                  tag: 'guardian_profile_image_${guardian.id}',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    child: CustomUserProfileImageWidget(
+                        profileUrl: guardian.image ?? ""),
+                  ),
                 ),
-                child: CustomUserProfileImageWidget(
-                    profileUrl: guardian.image ?? ""),
               ),
             ),
           ),
@@ -87,8 +105,10 @@ class GuardianDetailsContainer extends StatelessWidget {
                 height: 60,
               ),
               Divider(
-                color:
-                    Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.75),
                 height: 1.25,
               ),
               const SizedBox(
@@ -111,7 +131,12 @@ class GuardianDetailsContainer extends StatelessWidget {
                   : _buildGuardianDetailsTitleAndValue(
                       context: context,
                       title: Utils.getTranslatedLabel(phoneNumberKey),
-                      value: Utils.formatEmptyValue(guardian.mobile ?? ""),
+                      value: Utils.formatEmptyValue(
+                        Utils.formatMobileNumber(
+                          countryCode: guardian.countryCode,
+                          mobile: guardian.mobile,
+                        ),
+                      ),
                     ),
               (guardian.currentAddress ?? "").isEmpty
                   ? const SizedBox()
