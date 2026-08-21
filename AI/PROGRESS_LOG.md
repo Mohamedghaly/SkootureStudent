@@ -1,3 +1,40 @@
+# SkootureStudent Project Update Log - August 21, 2026
+
+## Overview
+This log documents the synchronization of Android app icons and native/in-app splash screens to achieve 100% visual parity with the iOS version.
+
+## Key Accomplishments
+
+### 1. Android App Icon Parity
+*   **Source Alignment**: Configured `flutter_launcher_icons` to use the high-resolution 1024x1024 master icon (`ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png`).
+*   **Density Generation**: Generated full-density mipmap icons (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
+*   **Asset Synchronization**: Synchronized `launcher_icon.png`, `ic_launcher.png`, `ic_launcher_round.png`, and `ic_launcher_squircle.png` across all Android mipmaps and `assets/appLogo/`.
+
+### 2. Native Android Splash Screen
+*   **Multi-Density Drawables**: Generated `launch_image.png` across all drawable densities (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) matching the iOS transparent student logo.
+*   **Layer-List Configuration**: Updated `launch_background.xml` (both standard and `drawable-v21`) to display a white background (`#FFFFFF`) with centered `launch_image`.
+*   **Android 12+ Splash API**: Configured `values-v31/styles.xml` to set `windowSplashScreenBackground` (white) and `windowSplashScreenAnimatedIcon` (`@drawable/launch_image`).
+
+### 3. In-App Flutter Splash Screen
+*   **Image Rendering Fix**: Replaced erroneous `SvgPicture.asset` with `Image.asset(Utils.getImagePath("logo.png"))` in `lib/ui/screens/splashScreen.dart` on a clean white background.
+*   **Asset Alignment**: Added `assets/images/logo.png` and updated `student.png` to match the iOS logo.
+
+### 4. iOS & Xcode Dynamic Versioning
+*   **Dynamic Variable Binding**: Bound `MARKETING_VERSION` to `"$(FLUTTER_BUILD_NAME)"` and `CURRENT_PROJECT_VERSION` to `"$(FLUTTER_BUILD_NUMBER)"` across `Debug`, `Profile`, and `Release` configurations in `ios/Runner.xcodeproj/project.pbxproj`.
+*   **Config Synchronization**: Refreshed `ios/Flutter/Generated.xcconfig` to eliminate discrepancies where Xcode archives displayed stale cached versions (e.g. 1.1.1 build 4).
+
+### 5. Android Toolchain, Symbol Stripping Fix & Version Bump
+*   **Version Bump**: Set `version: 1.2.0+5` in `pubspec.yaml` and `local.properties` to ensure `versionCode: 5` cleanly increments past previous store releases.
+*   **Stale Path & NDK Fix**: Resolved `Release app bundle failed to strip debug symbols from native libraries` by purging legacy `.cxx` CMake cache directories containing obsolete developer paths (`/Users/virpalsinhjadeja/...`), adding `**/.cxx/` to `.gitignore`, and configuring explicit `ndk.dir` in `android/local.properties` pointing to NDK 28.2.13676358.
+
+## Current Status
+*   **Version**: `1.2.0+5`
+*   **Health**: `flutter analyze lib` and `flutter test` pass with 0 issues.
+*   **Parity**: Android splash screen and launcher icon match iOS 1:1.
+*   **Toolchain**: Android NDK and CMake build paths cleaned and verified.
+
+---
+
 # SkootureStudent Project Update Log - August 20, 2026
 
 ## Overview

@@ -1,3 +1,39 @@
+# Session Progress - August 21, 2026
+
+## Summary of Completed Tasks
+
+### 1. Android Splash Screen & App Icon Parity with iOS
+- **Objective:** Replicate the iOS splash screen and launcher app icon on Android for full platform parity and visual consistency.
+- **Completed Changes:**
+  1. **App Icons:**
+     - Pointed `flutter_launcher_icons` configuration in `pubspec.yaml` to the iOS master 1024x1024 icon (`ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png`).
+     - Ran `flutter pub run flutter_launcher_icons` to generate sharp, full-density Android launcher icons (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`).
+     - Synchronized all `launcher_icon`, `ic_launcher`, `ic_launcher_round`, and `ic_launcher_squircle` variants in `android/app/src/main/res/` and `assets/appLogo/`.
+  2. **Native Android Splash Screen:**
+     - Created multi-density splash drawables (`launch_image.png`) in `drawable`, `drawable-mdpi`, `drawable-hdpi`, `drawable-xhdpi`, `drawable-xxhdpi`, and `drawable-xxxhdpi` using the transparent student logo.
+     - Updated `android/app/src/main/res/drawable/launch_background.xml` and `drawable-v21/launch_background.xml` with pure white background (`#FFFFFF`) and centered `@drawable/launch_image`.
+     - Created `android/app/src/main/res/values-v31/styles.xml` to support Android 12+ Splash Screen API (`windowSplashScreenBackground` and `windowSplashScreenAnimatedIcon`).
+  3. **Flutter In-App Splash Screen:**
+     - Fixed `SplashScreen` in `lib/ui/screens/splashScreen.dart` to use `Image.asset` for `logo.png` (resolving the previous `SvgPicture` crash on binary PNG).
+     - Added `assets/images/logo.png` and updated `student.png` to match the iOS logo.
+- **Result:** Android app icon and splash screen match the iOS version 1:1; `flutter analyze lib` and `flutter test` pass with 0 issues.
+
+### 2. Version Alignment & Toolchain Fix (Symbol Stripping)
+- **Objective:** Fix version discrepancies between Xcode Archive and Flutter, resolve Android native symbol stripping failure, and prepare clean environment for release.
+- **Completed Changes:**
+  1. **Xcode Version Synchronization:**
+     - Bound `MARKETING_VERSION` to `$(FLUTTER_BUILD_NAME)` and `CURRENT_PROJECT_VERSION` to `$(FLUTTER_BUILD_NUMBER)` across `Debug`, `Profile`, and `Release` in `ios/Runner.xcodeproj/project.pbxproj`.
+     - Refreshed `ios/Flutter/Generated.xcconfig` via `flutter build ios --config-only`.
+  2. **Version Bump for Google Play:**
+     - Updated `pubspec.yaml` to `version: 1.2.0+5` ensuring `versionCode` (5) strictly exceeds previous store uploads (which were at 4).
+  3. **Symbol Stripping & NDK Cache Resolution:**
+     - Identified root cause of `Release app bundle failed to strip debug symbols from native libraries`: stale `.cxx` CMake build caches containing hardcoded paths from another machine (`/Users/virpalsinhjadeja/...`).
+     - Removed obsolete `android/app/.cxx` directories and added `**/.cxx/` to `.gitignore`.
+     - Configured `ndk.dir=/Users/mohamedghalii/Library/Android/sdk/ndk/28.2.13676358` in `android/local.properties`.
+- **Result:** Android and iOS versioning unified at `1.2.0+5`; toolchain cleaned and ready for store release.
+
+---
+
 # Session Progress - August 20, 2026
 
 ## Summary of Completed Tasks

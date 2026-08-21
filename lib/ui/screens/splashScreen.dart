@@ -1,13 +1,13 @@
 import 'package:eschool/app/routes.dart';
 import 'package:eschool/cubits/appConfigurationCubit.dart';
 import 'package:eschool/cubits/authCubit.dart';
+import 'package:eschool/ui/widgets/appUnderMaintenanceContainer.dart';
 import 'package:eschool/ui/widgets/errorContainer.dart';
 import 'package:eschool/utils/animationConfiguration.dart';
 import 'package:eschool/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/route_manager.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,7 +17,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 
   static Widget routeInstance() {
-    return SplashScreen();
+    return const SplashScreen();
   }
 }
 
@@ -26,8 +26,16 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () {
-      context.read<AppConfigurationCubit>().fetchAppConfiguration();
+      if (mounted) {
+        context.read<AppConfigurationCubit>().fetchAppConfiguration();
+      }
     });
+  }
+
+  /// Returns `true` if app maintenance mode is active.
+  bool _isUnderMaintenance() {
+    final configCubit = context.read<AppConfigurationCubit>();
+    return configCubit.appUnderMaintenance();
   }
 
   void navigateToNextScreen() {
@@ -45,10 +53,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: BlocConsumer<AppConfigurationCubit, AppConfigurationState>(
         listener: (context, appConfigState) {
           if (appConfigState is AppConfigurationFetchSuccess) {
-            navigateToNextScreen();
+            if (!_isUnderMaintenance()) {
+              navigateToNextScreen();
+            }
           }
         },
         builder: (context, appConfigState) {
@@ -63,6 +74,11 @@ class _SplashScreenState extends State<SplashScreen> {
             );
           }
 
+          if (appConfigState is AppConfigurationFetchSuccess &&
+              _isUnderMaintenance()) {
+            return const AppUnderMaintenanceContainer();
+          }
+
           return Center(
             child: Animate(
               effects: customItemZoomAppearanceEffects(
@@ -75,8 +91,10 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(25.0),
-                child: SvgPicture.asset(
-                  Utils.getImagePath("student.png"),
+                child: Image.asset(
+                  Utils.getImagePath("logo.png"),
+                  width: MediaQuery.of(context).size.width * 0.75,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -86,4 +104,5 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
 

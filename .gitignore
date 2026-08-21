@@ -52,3 +52,8 @@ pubspec.lock
 
 # Upstream reference archives
 AI/e-school-saas/
+
+# Android Native CMake/CXX cache
+**/.cxx/
+**/android/app/.cxx/
+
