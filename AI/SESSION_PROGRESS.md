@@ -10,10 +10,11 @@
   - Synced iOS configuration via `flutter build ios --config-only`, updating `ios/Flutter/Generated.xcconfig` (`FLUTTER_BUILD_NAME=1.2.0`, `FLUTTER_BUILD_NUMBER=2`).
   - Validated static analysis with `flutter analyze lib` (0 issues).
 
-### 2. Android App Bundle (AAB) Generation & Release Packaging
-- **Objective:** Generate a signed Android App Bundle (`app-release.aab`) ready for Google Play Store upload.
+### 2. Android 16 (API 36) Compliance & AAB Generation
+- **Objective:** Update target SDK to Android 16 (API Level 36) to comply with Google Play requirements and generate a compliant release AAB bundle.
 - **Completed Changes:**
-  - Installed Android `cmdline-tools` component and removed obsolete `doNotStrip` in `android/app/build.gradle` to resolve the native symbol stripping failure and optimize bundle size.
+  - Updated `targetSdkVersion` to `36` in `android/app/build.gradle`.
+  - Installed Android `cmdline-tools` component and removed obsolete `doNotStrip` in `android/app/build.gradle` to resolve native symbol stripping and optimize bundle size.
   - Successfully generated release AAB bundle (75.3MB) via `flutter build appbundle --release` signed with `upload-keystore.jks`.
   - Updated `.gitignore` to include `.kotlin/` compiler cache.
   - Verified bundle generation at `build/app/outputs/bundle/release/app-release.aab`.

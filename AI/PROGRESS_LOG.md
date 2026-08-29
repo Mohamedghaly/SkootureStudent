@@ -10,8 +10,9 @@ This log documents the version adjustment to `1.2.0+2` across iOS and Android, c
 *   **Android Local Properties**: Synchronized `flutter.versionName=1.2.0` and `flutter.versionCode=2` in `android/local.properties`.
 *   **iOS Build Configuration**: Regenerated `ios/Flutter/Generated.xcconfig` with `FLUTTER_BUILD_NAME=1.2.0` and `FLUTTER_BUILD_NUMBER=2`.
 
-### 2. Android App Bundle (AAB) Generation & Symbol Stripping
-*   **Toolchain Fix**: Installed Android `cmdline-tools` and removed obsolete `doNotStrip "**/*.so"` in `android/app/build.gradle` to allow proper native library symbol stripping and reduce AAB bundle size.
+### 2. Android 16 (API Level 36) Target Compliance & AAB Generation
+*   **Play Store Compliance**: Updated `targetSdkVersion` from `35` to `36` in `android/app/build.gradle` to meet Google Play's Android 16 requirement.
+*   **Toolchain Fix**: Installed Android `cmdline-tools` and removed obsolete `doNotStrip "**/*.so"` in `android/app/build.gradle` to enable native symbol stripping and reduce AAB bundle size.
 *   **Production Build**: Successfully built `flutter build appbundle --release` signed with `upload-keystore.jks` producing optimized 75.3MB release AAB.
 
 ### 3. Repository & Environment Maintenance
