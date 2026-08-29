@@ -1,3 +1,31 @@
+# SkootureStudent Project Update Log - August 29, 2026
+
+## Overview
+This log documents the version adjustment to `1.2.0+2` across iOS and Android, compilation and generation of the production Android App Bundle (`app-release.aab`), repository cleanup, and synchronization with GitHub.
+
+## Key Accomplishments
+
+### 1. Version Alignment (1.2.0+2)
+*   **Pubspec Configuration**: Set version to `1.2.0+2` in `pubspec.yaml`.
+*   **Android Local Properties**: Synchronized `flutter.versionName=1.2.0` and `flutter.versionCode=2` in `android/local.properties`.
+*   **iOS Build Configuration**: Regenerated `ios/Flutter/Generated.xcconfig` with `FLUTTER_BUILD_NAME=1.2.0` and `FLUTTER_BUILD_NUMBER=2`.
+
+### 2. Android App Bundle (AAB) Generation & Symbol Stripping
+*   **Toolchain Fix**: Installed Android `cmdline-tools` and removed obsolete `doNotStrip "**/*.so"` in `android/app/build.gradle` to allow proper native library symbol stripping and reduce AAB bundle size.
+*   **Production Build**: Successfully built `flutter build appbundle --release` signed with `upload-keystore.jks` producing optimized 75.3MB release AAB.
+
+### 3. Repository & Environment Maintenance
+*   **Gitignore**: Added `.kotlin/` to ignore local Kotlin compiler cache directories.
+*   **Code Health**: Validated with `flutter analyze lib` (0 issues).
+
+## Current Status
+*   **Branch**: `feature/mergeNewUpdates`
+*   **Version**: `1.2.0+2`
+*   **Health**: All static analysis passed with 0 issues.
+*   **Artifacts**: `build/app/outputs/bundle/release/app-release.aab` generated for Google Play Console upload.
+
+---
+
 # SkootureStudent Project Update Log - August 21, 2026
 
 ## Overview
@@ -28,7 +56,7 @@ This log documents the synchronization of Android app icons and native/in-app sp
 *   **Stale Path & NDK Fix**: Resolved `Release app bundle failed to strip debug symbols from native libraries` by purging legacy `.cxx` CMake cache directories containing obsolete developer paths (`/Users/virpalsinhjadeja/...`), adding `**/.cxx/` to `.gitignore`, and configuring explicit `ndk.dir` in `android/local.properties` pointing to NDK 28.2.13676358.
 
 ## Current Status
-*   **Version**: `1.2.0+5`
+*   **Version**: `1.2.0+2`
 *   **Health**: `flutter analyze lib` and `flutter test` pass with 0 issues.
 *   **Parity**: Android splash screen and launcher icon match iOS 1:1.
 *   **Toolchain**: Android NDK and CMake build paths cleaned and verified.
