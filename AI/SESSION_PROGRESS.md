@@ -2,12 +2,12 @@
 
 ## Summary of Completed Tasks
 
-### 1. App Version Alignment (1.2.0+2) for iOS and Android
-- **Objective:** Standardize the app release version to `1.2.0+2` (`versionCode: 2` / `FLUTTER_BUILD_NUMBER: 2`) across both iOS and Android platforms.
+### 1. App Version Bump (1.2.0+6 / versionCode 6)
+- **Objective:** Increment Android version code to `6` (`1.2.0+6`) to exceed all previously uploaded release builds in Google Play Console.
 - **Completed Changes:**
-  - Updated `pubspec.yaml` to `version: 1.2.0+2`.
-  - Updated `android/local.properties` to `flutter.versionName=1.2.0` and `flutter.versionCode=2`.
-  - Synced iOS configuration via `flutter build ios --config-only`, updating `ios/Flutter/Generated.xcconfig` (`FLUTTER_BUILD_NAME=1.2.0`, `FLUTTER_BUILD_NUMBER=2`).
+  - Updated `pubspec.yaml` to `version: 1.2.0+6`.
+  - Updated `android/local.properties` to `flutter.versionName=1.2.0` and `flutter.versionCode=6`.
+  - Bound `CURRENT_PROJECT_VERSION` to `"$(FLUTTER_BUILD_NUMBER)"` in `ios/Runner.xcodeproj/project.pbxproj`.
   - Validated static analysis with `flutter analyze lib` (0 issues).
 
 ### 2. Android 16 (API 36) Compliance & AAB Generation
@@ -15,7 +15,7 @@
 - **Completed Changes:**
   - Updated `targetSdkVersion` to `36` in `android/app/build.gradle`.
   - Installed Android `cmdline-tools` component and removed obsolete `doNotStrip` in `android/app/build.gradle` to resolve native symbol stripping and optimize bundle size.
-  - Successfully generated release AAB bundle (75.3MB) via `flutter build appbundle --release` signed with `upload-keystore.jks`.
+  - Successfully generated release AAB bundle (75.3MB) via `flutter build appbundle --release` signed with `upload-keystore.jks` with `versionCode: 6` and `targetSdkVersion: 36`.
   - Updated `.gitignore` to include `.kotlin/` compiler cache.
   - Verified bundle generation at `build/app/outputs/bundle/release/app-release.aab`.
 

@@ -1,19 +1,19 @@
 # SkootureStudent Project Update Log - August 29, 2026
 
 ## Overview
-This log documents the version adjustment to `1.2.0+2` across iOS and Android, compilation and generation of the production Android App Bundle (`app-release.aab`), repository cleanup, and synchronization with GitHub.
+This log documents the version adjustment to `1.2.0+6` (versionCode 6) to increment past existing Google Play Console releases, updating `targetSdkVersion` to 36 (Android 16), compilation and generation of the production Android App Bundle (`app-release.aab`), repository cleanup, and synchronization with GitHub.
 
 ## Key Accomplishments
 
-### 1. Version Alignment (1.2.0+2)
-*   **Pubspec Configuration**: Set version to `1.2.0+2` in `pubspec.yaml`.
-*   **Android Local Properties**: Synchronized `flutter.versionName=1.2.0` and `flutter.versionCode=2` in `android/local.properties`.
-*   **iOS Build Configuration**: Regenerated `ios/Flutter/Generated.xcconfig` with `FLUTTER_BUILD_NAME=1.2.0` and `FLUTTER_BUILD_NUMBER=2`.
+### 1. Version Bump (1.2.0+6 / versionCode 6)
+*   **Pubspec Configuration**: Set version to `1.2.0+6` in `pubspec.yaml`.
+*   **Android Local Properties**: Synchronized `flutter.versionName=1.2.0` and `flutter.versionCode=6` in `android/local.properties`.
+*   **iOS Build Configuration**: Bound `CURRENT_PROJECT_VERSION` to `"$(FLUTTER_BUILD_NUMBER)"` in `ios/Runner.xcodeproj/project.pbxproj`.
 
 ### 2. Android 16 (API Level 36) Target Compliance & AAB Generation
 *   **Play Store Compliance**: Updated `targetSdkVersion` from `35` to `36` in `android/app/build.gradle` to meet Google Play's Android 16 requirement.
 *   **Toolchain Fix**: Installed Android `cmdline-tools` and removed obsolete `doNotStrip "**/*.so"` in `android/app/build.gradle` to enable native symbol stripping and reduce AAB bundle size.
-*   **Production Build**: Successfully built `flutter build appbundle --release` signed with `upload-keystore.jks` producing optimized 75.3MB release AAB.
+*   **Production Build**: Successfully built `flutter build appbundle --release` signed with `upload-keystore.jks` producing optimized 75.3MB release AAB (`versionCode: 6`, `targetSdkVersion: 36`).
 
 ### 3. Repository & Environment Maintenance
 *   **Gitignore**: Added `.kotlin/` to ignore local Kotlin compiler cache directories.
@@ -21,7 +21,7 @@ This log documents the version adjustment to `1.2.0+2` across iOS and Android, c
 
 ## Current Status
 *   **Branch**: `feature/mergeNewUpdates`
-*   **Version**: `1.2.0+2`
+*   **Version**: `1.2.0+6` (versionCode: 6)
 *   **Health**: All static analysis passed with 0 issues.
 *   **Artifacts**: `build/app/outputs/bundle/release/app-release.aab` generated for Google Play Console upload.
 
